@@ -5,11 +5,13 @@ public class CounterTest {
         testUnsynchronized();
         testSynchronizedMethods();
         testSynchronizedBlocks();
-        testObjectLock();
+        testCounterAtomic();
     }
 
     private static void testUnsynchronized() throws InterruptedException {
         Counter counter = new Counter();
+
+        long start = System.nanoTime(); // початок вимірювання
 
         Thread incrementThread = new Thread(() -> {
             for (int i = 0; i < ITERATIONS; i++) {
@@ -29,11 +31,17 @@ public class CounterTest {
         incrementThread.join();
         decrementThread.join();
 
-        System.out.println("Counter Result: " + counter.getCount());
+        long end = System.nanoTime(); // кінець вимірювання
+        long durationMs = (end - start) / 1_000_000; // перетворюємо в мілісекунди
+
+        System.out.println("Counter Result: " + counter.getCount() +
+                " | Time: " + durationMs + " ms");
     }
 
     private static void testSynchronizedMethods() throws InterruptedException {
         Counter counter = new Counter();
+
+        long start = System.nanoTime();
 
         Thread incrementThread = new Thread(() -> {
             for (int i = 0; i < ITERATIONS; i++) {
@@ -53,11 +61,17 @@ public class CounterTest {
         incrementThread.join();
         decrementThread.join();
 
-        System.out.println("Synchronized Methods Result: " + counter.getCount());
+        long end = System.nanoTime();
+        long durationMs = (end - start) / 1_000_000;
+
+        System.out.println("Synchronized Methods Result: " + counter.getCount() +
+                " | Time: " + durationMs + " ms");
     }
 
     private static void testSynchronizedBlocks() throws InterruptedException {
         Counter counter = new Counter();
+
+        long start = System.nanoTime();
 
         Thread incrementThread = new Thread(() -> {
             for (int i = 0; i < ITERATIONS; i++) {
@@ -77,21 +91,28 @@ public class CounterTest {
         incrementThread.join();
         decrementThread.join();
 
-        System.out.println("Synchronized Blocks Result: " + counter.getCount());
+        long end = System.nanoTime();
+        long durationMs = (end - start) / 1_000_000;
+
+        System.out.println("Synchronized Blocks Result: " + counter.getCount() +
+                " | Time: " + durationMs + " ms");
+
     }
 
-    private static void testObjectLock() throws InterruptedException {
-        Counter counter = new Counter();
+    private static void testCounterAtomic() throws InterruptedException {
+        CounterAtomic counter = new CounterAtomic();
+
+        long start = System.nanoTime();
 
         Thread incrementThread = new Thread(() -> {
             for (int i = 0; i < ITERATIONS; i++) {
-                counter.incrementWithLock();
+                counter.increment();
             }
         });
 
         Thread decrementThread = new Thread(() -> {
             for (int i = 0; i < ITERATIONS; i++) {
-                counter.decrementWithLock();
+                counter.decrement();
             }
         });
 
@@ -101,6 +122,10 @@ public class CounterTest {
         incrementThread.join();
         decrementThread.join();
 
-        System.out.println("Object Lock Result: " + counter.getCount());
+        long end = System.nanoTime();
+        long durationMs = (end - start) / 1_000_000;
+
+        System.out.println("Atomic Counter Result: " + counter.getCount() +
+                " | Time: " + durationMs + " ms");
     }
 }
