@@ -13,7 +13,11 @@ public class Ball {
 
     public Ball(Component c, Color color) {
         this.canvas = c;
-        this.color = color;
+        if (color.equals(Color.BLUE)) {
+            this.color = new Color(0, 0, 255, 25); // майже прозорий синій // 50% прозорість
+        } else {
+            this.color = color; // інші кольори без змін
+        }
         this.x = 100;
         this.y = 100;
     }

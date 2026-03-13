@@ -13,6 +13,11 @@ public class BallCanvas extends JPanel {
         return balls;
     }
 
+    public void clearBalls() {
+        balls.clear();
+        repaint();
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);

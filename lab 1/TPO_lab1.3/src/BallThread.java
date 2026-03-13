@@ -16,11 +16,16 @@ public class BallThread extends Thread {
     public void run() {
         try {
             for (int i = 1; i < 10000; i++) {
+
+                if (Thread.currentThread().isInterrupted()) {
+                    break;
+                }
+
                 ball.move();
                 Thread.sleep(5);
             }
         } catch (InterruptedException ex) {
-            ex.printStackTrace();
+            // потік завершується
         }
     }
 }
