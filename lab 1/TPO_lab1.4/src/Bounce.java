@@ -9,5 +9,6 @@ public class Bounce {
         System.out.println("Thread name = " +
                 Thread.currentThread().getName());
 
+        System.out.println("Reached the pocket:");
     }
 }

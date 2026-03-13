@@ -1,6 +1,6 @@
 public class BallThread extends Thread {
     private Ball b;
-    private BallThread threadToJoin;
+    private BallThread threadToJoin; // попередній потік
 
     public BallThread(Ball ball) {
         this.b = ball;
@@ -20,12 +20,16 @@ public class BallThread extends Thread {
                 threadToJoin.join();
             }
 
-            // кулька рухається, поки вона не потрапить в лузу
             while (!b.isFinished()) {
                 b.move();
-                System.out.println("Thread name = " + Thread.currentThread().getName());
                 Thread.sleep(5);
             }
+
+            System.out.println(
+                    "Thread name = " + Thread.currentThread().getName() +
+                            " | Color = " + b.getColorName()
+            );
+
         } catch (InterruptedException ex) {
             //
         }

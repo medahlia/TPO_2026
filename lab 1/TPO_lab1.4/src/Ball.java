@@ -17,13 +17,25 @@ public class Ball {
         this.canvas = c;
         this.color = color;
 
-        // випадкова початкова позиція з країв
-        if (Math.random() < 0.5) {
-            x = new Random().nextInt(this.canvas.getWidth());
-            y = 0;
-        } else {
-            x = 0;
-            y = new Random().nextInt(this.canvas.getHeight());
+        int perimeterSide = new Random().nextInt(4); // 0=top, 1=bottom, 2=left, 3=right
+
+        switch (perimeterSide) {
+            case 0:
+                x = new Random().nextInt(canvas.getWidth() - XSIZE);
+                y = 0;
+                break;
+            case 1:
+                x = new Random().nextInt(canvas.getWidth() - XSIZE);
+                y = canvas.getHeight() - YSIZE;
+                break;
+            case 2:
+                x = 0;
+                y = new Random().nextInt(canvas.getHeight() - YSIZE);
+                break;
+            case 3:
+                x = canvas.getWidth() - XSIZE;
+                y = new Random().nextInt(canvas.getHeight() - YSIZE);
+                break;
         }
     }
 
@@ -80,5 +92,17 @@ public class Ball {
     // фіксує, чи потрапила кулька в лузу
     public boolean isFinished() {
         return isFinished;
+    }
+
+    public String getColorName() {
+        if (color.equals(Color.RED)) return "Red";
+        if (color.equals(Color.BLUE)) return "Blue";
+        if (color.equals(Color.GREEN)) return "Green";
+        if (color.equals(Color.YELLOW)) return "Yellow";
+        if (color.equals(Color.ORANGE)) return "Orange";
+        if (color.equals(Color.PINK)) return "Pink";
+        if (color.equals(Color.CYAN)) return "Cyan";
+        if (color.equals(Color.MAGENTA)) return "Magenta";
+        return "Unknown";
     }
 }

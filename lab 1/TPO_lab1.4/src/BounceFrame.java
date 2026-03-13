@@ -10,7 +10,7 @@ public class BounceFrame extends JFrame {
 
     public BounceFrame() {
         this.setSize(WIDTH, HEIGHT);
-        this.setTitle("Bounce program with pocket");
+        this.setTitle("Bounce program");
         this.canvas = new BallCanvas();
 
         Container content = this.getContentPane();

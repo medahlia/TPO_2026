@@ -22,7 +22,6 @@ public class BallCanvas extends JPanel {
         g2.fill(new Ellipse2D.Double(pocketX, pocketY,
                 POCKET_RADIUS * 2, POCKET_RADIUS * 2));
 
-
         for (int i = 0; i < balls.size(); i++) {
             Ball b = balls.get(i);
             b.draw(g2);
