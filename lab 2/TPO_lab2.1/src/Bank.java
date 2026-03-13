@@ -1,3 +1,6 @@
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 class Bank {
     public static final int NTEST = 10000;
     private final int[] accounts;
@@ -19,7 +22,34 @@ class Bank {
             test();
     }
 
-    public void test(){
+    public synchronized void syncTransfer(int from, int to, int amount) {
+        accounts[from] -= amount;
+        accounts[to] += amount;
+        ntransacts++;
+        if (ntransacts % NTEST == 0) {
+            test();
+        }
+    }
+
+    public synchronized void waitTransfer(int from, int to, int amount) {
+        try {
+            while (accounts[from] < amount) {
+                wait();
+            }
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Bank.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        accounts[from] -= amount;
+        accounts[to] += amount;
+        ntransacts++;
+        notifyAll();
+        if (ntransacts % NTEST == 0) {
+            test();
+        }
+    }
+
+    public void test() {
         int sum = 0;
         for (int i = 0; i < accounts.length; i++) {
             sum += accounts[i] ;
@@ -27,6 +57,7 @@ class Bank {
         System.out.println("Transactions:" + ntransacts
                 + " Sum: " + sum);
     }
+
     public int size(){
         return accounts.length;
     }
