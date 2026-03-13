@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 
-
 //вікно графічного інтерфейсу
 public class BounceFrame extends JFrame {
 
@@ -23,7 +22,7 @@ public class BounceFrame extends JFrame {
         System.out.println("In Frame Thread name = " + Thread.currentThread().getName());
 
         Container content = this.getContentPane();
-        content.setLayout(new BorderLayout());
+        content.setLayout(new BorderLayout()); //
         content.add(this.canvas, BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel();
