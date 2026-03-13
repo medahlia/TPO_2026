@@ -8,7 +8,7 @@ public class BallCanvas extends JPanel {
 
     // луза
     private static final int HOLE_SIZE = 40;
-    private static final Color HOLE_COLOR = Color.GREEN;
+    private static final Color HOLE_COLOR = Color.BLUE;
 
     public BallCanvas(BounceFrame frame) {
         this.frame = frame;

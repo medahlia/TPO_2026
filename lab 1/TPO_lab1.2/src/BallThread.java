@@ -8,12 +8,12 @@ public class BallThread extends Thread {
     @Override
     public void run() {
         try {
-            while (b.isAlive()) {
+            while (b.isAlive()) { // чи "жива" кулька, а не потік
                 b.move();
                 Thread.sleep(5);
             }
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
-    }
+    } // state: terminated
 }

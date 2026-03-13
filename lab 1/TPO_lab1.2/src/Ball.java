@@ -33,7 +33,6 @@ public class Ball {
         }
     }
 
-    // рух
     public void move() {
         if (!alive) return;
 
