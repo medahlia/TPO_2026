@@ -1,14 +1,15 @@
 public class Drop {
     // Message sent from producer
     // to consumer.
-    private String message;
+    private int number;
     // True if consumer should wait
     // for producer to send message,
+
     // false if producer should wait for
     // consumer to retrieve message.
     private boolean empty = true;
 
-    public synchronized String take() {
+    public synchronized int take() {
         // Wait until message is
         // available.
         while (empty) {
@@ -21,12 +22,12 @@ public class Drop {
         // Notify producer that
         // status has changed.
         notifyAll();
-        return message;
+        return number;
     }
 
-    public synchronized void put(String message) {
+    public synchronized void put(int number) {
         // Wait until message has
-        // been retrieved.
+        // been retrieved. (отримано)
         while (!empty) {
             try {
                 wait();
@@ -35,7 +36,7 @@ public class Drop {
         // Toggle status.
         empty = false;
         // Store message.
-        this.message = message;
+        this.number = number;
         // Notify consumer that status
         // has changed.
         notifyAll();
