@@ -1,3 +1,5 @@
+package atomicTypes;
+
 class TransferThread extends Thread {
     private Bank bank;
     private int fromAccount;
@@ -16,9 +18,7 @@ class TransferThread extends Thread {
             for (int i = 0; i < REPS; i++) {
                 int toAccount = (int) (bank.size() * Math.random());
                 int amount = (int) (maxAmount * Math.random() / REPS);
-                bank.transfer(fromAccount, toAccount, amount); // початковий варіант програми
-                //bank.syncTransfer(fromAccount, toAccount, amount);
-                //bank.waitTransfer(fromAccount, toAccount, amount); // ~ deadlock
+                bank.transfer(fromAccount, toAccount, amount);
             }
         }
     }

@@ -1,3 +1,4 @@
+import java.net.SocketOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,15 +23,20 @@ class Bank {
             test();
     }
 
-    public synchronized void syncTransfer(int from, int to, int amount) {
-        accounts[from] -= amount;
-        accounts[to] += amount;
-        ntransacts++;
-        if (ntransacts % NTEST == 0) {
-            test();
+    /*
+    public void syncTransfer(int from, int to, int amount) {
+        synchronized (this) {
+            accounts[from] -= amount;
+            accounts[to] += amount;
+            ntransacts++;
+            if (ntransacts % NTEST == 0) {
+                test();
+            }
         }
     }
+    */
 
+    /*
     public synchronized void waitTransfer(int from, int to, int amount) {
         try {
             while (accounts[from] < amount) {
@@ -43,11 +49,15 @@ class Bank {
         accounts[from] -= amount;
         accounts[to] += amount;
         ntransacts++;
-        notifyAll(); // якщо потоків багато, то варто використовувати notify()
+
+        notifyAll(); // якщо потоків багато, то варто використовувати notify(), 12
+
         if (ntransacts % NTEST == 0) {
             test();
         }
     }
+
+    */
 
     public void test() {
         int sum = 0;
