@@ -43,7 +43,7 @@ class Bank {
         accounts[from] -= amount;
         accounts[to] += amount;
         ntransacts++;
-        notifyAll();
+        notifyAll(); // якщо потоків багато, то варто використовувати notify()
         if (ntransacts % NTEST == 0) {
             test();
         }

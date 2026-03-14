@@ -25,10 +25,6 @@ public class Counter {
         }
     }
 
-    // синхронізація через Atomic
-
-
-
     // без синхронізації
     public void increment() {
         count++;

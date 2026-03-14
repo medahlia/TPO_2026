@@ -42,7 +42,7 @@ public class BounceFrame extends JFrame {
             }
         });
 
-        // Обробник натискання кнопки "Stop"
+        // обробник натискання кнопки "Stop"
         buttonStop.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

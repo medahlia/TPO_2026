@@ -25,7 +25,7 @@ public class BallThread extends Thread {
                 Thread.sleep(5);
             }
         } catch (InterruptedException ex) {
-            // потік завершується
+
         }
     }
 }
