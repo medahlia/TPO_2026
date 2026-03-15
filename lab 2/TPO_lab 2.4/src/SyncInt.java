@@ -1,6 +1,3 @@
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class SyncInt {
     private int num;
     private int permission;
@@ -17,20 +14,23 @@ public class SyncInt {
     public synchronized void waitAndChange(int control, int maxControl, char s) {
         while (getPermission() % maxControl != control) {
             try {
-                //System.out.println("\n" + s + " will wait");
                 wait();
             } catch (InterruptedException e) {
-                //Logger.getLogger(Sync.class.getName()).log(Level.SEVERE, null, e);
+                Thread.currentThread().interrupt();
+                return;
             }
         }
-        System.out.println(s);
+
+        System.out.print(s);
         permission++;
         num++;
-        if (num % 99 == 0)
+
+        if (num % (maxControl * 30) == 0)
             System.out.println();
 
-        if (num == 9900)
+        if (num == maxControl * 30 * 90)
             stop = true;
+
         notifyAll();
     }
 }
