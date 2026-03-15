@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SonarLintProjectSettings">
+    <option name="moduleMapping">
+      <map>
+        <entry key="TPO_lab2.4" value="TPO_lab 2.4" />
+      </map>
+    </option>
+  </component>
+</project>

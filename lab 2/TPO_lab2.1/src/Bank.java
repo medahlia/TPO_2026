@@ -15,6 +15,7 @@ class Bank {
         ntransacts = 0;
     }
 
+
     public void transfer(int from, int to, int amount) {
         accounts[from] -= amount;
         accounts[to] += amount;
@@ -23,7 +24,6 @@ class Bank {
             test();
     }
 
-    /*
     public void syncTransfer(int from, int to, int amount) {
         synchronized (this) {
             accounts[from] -= amount;
@@ -34,9 +34,7 @@ class Bank {
             }
         }
     }
-    */
 
-    /*
     public synchronized void waitTransfer(int from, int to, int amount) {
         try {
             while (accounts[from] < amount) {
@@ -56,8 +54,6 @@ class Bank {
             test();
         }
     }
-
-    */
 
     public void test() {
         int sum = 0;
