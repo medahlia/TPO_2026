@@ -1,4 +1,5 @@
-public class TeacherThread  implements Runnable {
+public class TeacherThread implements Runnable {
+
     private GradeBook gradeBook;
     private String name;
     private boolean lecturer;
@@ -13,29 +14,19 @@ public class TeacherThread  implements Runnable {
 
     @Override
     public void run() {
-        for (int week = 1; week <= 5; week++) {
-            if (lecturer) {
-                for (int g = 0; g < 3; g++) {
-                    for (int student = 0; student < 5; student++) {
-                        gradeBook.addGrade(g, student, name);
 
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            } else {
-                for (int student = 0; student < 5; student++) {
-                    gradeBook.addGrade(group, student, name);
+        if (lecturer) {
 
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+            for (int g = 0; g < 3; g++) {
+                for (int s = 0; s < 30; s++) {
+                    gradeBook.addGrade(g, s, name);
                 }
+            }
+
+        } else {
+
+            for (int s = 0; s < 30; s++) {
+                gradeBook.addGrade(group, s, name);
             }
         }
     }
