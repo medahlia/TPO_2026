@@ -9,6 +9,10 @@ public class GradeBook {
     private Random random = new Random();
 
     public GradeBook() {
+        this(new Random());
+    }
+
+    public GradeBook(Random random) {
         groups = new ConcurrentHashMap[3];
         groupLocks = new ReentrantLock[3];
 
@@ -38,6 +42,16 @@ public class GradeBook {
         } finally {
             groupLocks[group].unlock();
         }
+    }
+
+    // Повертає оцінку або null якщо студента немає
+    public Integer getGrade(int group, int student) {
+        String studentCode = (group + 1) + "-" + String.format("%02d", student + 1);
+        return groups[group].get(studentCode);
+    }
+
+    public int getGroupSize(int group) {
+        return groups[group].size();
     }
 
     public void printGrades() {
