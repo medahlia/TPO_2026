@@ -2,7 +2,7 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
 
-        int weeks = 1;
+        int weeks = 4;
 
         for (int week = 1; week <= weeks; week++) {
 
@@ -35,6 +35,8 @@ public class Main {
             assistant1.join();
             assistant2.join();
             assistant3.join();
+
+            //gradeBook.printGrades();
         }
     }
 }

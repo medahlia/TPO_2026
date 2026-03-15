@@ -14,17 +14,13 @@ public class TeacherThread implements Runnable {
 
     @Override
     public void run() {
-
         if (lecturer) {
-
             for (int g = 0; g < 3; g++) {
                 for (int s = 0; s < 30; s++) {
                     gradeBook.addGrade(g, s, name);
                 }
             }
-
         } else {
-
             for (int s = 0; s < 30; s++) {
                 gradeBook.addGrade(group, s, name);
             }
