@@ -22,7 +22,7 @@ public class Bank {
         ntransacts = 0;
     }
 
-    // Базовий варіант з Lock (без перевірки балансу)
+    // базовий варіант з Lock (без перевірки балансу)
     public void transfer(int from, int to, int amount) {
         bankLock.lock();
         try {
@@ -36,19 +36,19 @@ public class Bank {
         }
     }
 
-    // Варіант з очікуванням достатнього балансу (аналог waitTransfer)
+    // варіант з очікуванням достатнього балансу (аналог waitTransfer)
     public void waitTransfer(int from, int to, int amount) {
         bankLock.lock();
         try {
             while (accounts[from] < amount) {
-                sufficientFunds.await(); // чекаємо на умову
+                sufficientFunds.await(); 
             }
             accounts[from] -= amount;
             accounts[to] += amount;
             ntransacts++;
             if (ntransacts % NTEST == 0)
                 test();
-            sufficientFunds.signalAll(); // повідомляємо всі очікуючі потоки
+            sufficientFunds.signalAll();
         } catch (InterruptedException ex) {
             Logger.getLogger(Bank.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
