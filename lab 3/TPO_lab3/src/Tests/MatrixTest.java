@@ -151,4 +151,36 @@ class MatrixTest {
             }
         }
     }
+
+    @Test
+    void testAllMethodsProduceSameResult() {
+        // Створимо невеликі матриці для тесту
+        Matrix a = Matrix.generateRandom(5, 4);
+        Matrix b = Matrix.generateRandom(4, 6);
+
+        // --- Sequential ---
+        SequentialMethod seqMethod = new SequentialMethod();
+        Matrix resSeq = seqMethod.multiply(a, b);
+
+        // --- Striped ---
+        StripedMethod stripedMethod = new StripedMethod();
+        Matrix resStriped = stripedMethod.multiplyMatrix(a, b, 3);
+
+        // --- Fox ---
+        FoxMethod foxMethod = new FoxMethod(a, b, 3);
+        Matrix resFox = foxMethod.multiplyMatrix();
+
+        // Перевірка, що всі значення співпадають
+        int rows = resSeq.getRows();
+        int cols = resSeq.getCols();
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                assertEquals(resSeq.getValue(i, j), resStriped.getValue(i, j),
+                        "Mismatch at [" + i + "," + j + "] between Sequential and Striped");
+                assertEquals(resSeq.getValue(i, j), resFox.getValue(i, j),
+                        "Mismatch at [" + i + "," + j + "] between Sequential and Fox");
+            }
+        }
+    }
 }
