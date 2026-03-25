@@ -105,4 +105,27 @@ class MatrixTest {
         assertEquals(139, result.getValue(1,0));
         assertEquals(154, result.getValue(1,1));
     }
+
+    @Test
+    void testStripedMultiplicationMatchesSequential() {
+        // Генеруємо випадкові матриці
+        Matrix a = Matrix.generateRandom(size, size);
+        Matrix b = Matrix.generateRandom(size, size);
+
+        // Послідовне множення
+        SequentialMethod seqMethod = new SequentialMethod();
+        Matrix expected = seqMethod.multiply(a, b);
+
+        // Паралельне множення (StripedMethod)
+        StripedMethod stripedMethod = new StripedMethod();
+        Matrix actual = stripedMethod.multiplyMatrix(a, b, 3); // 3 потоки
+
+        // Перевіряємо, що всі елементи збігаються
+        for (int i = 0; i < expected.getRows(); i++) {
+            for (int j = 0; j < expected.getCols(); j++) {
+                assertEquals(expected.getValue(i, j), actual.getValue(i, j),
+                        "Елемент [" + i + "][" + j + "] не збігається");
+            }
+        }
+    }
 }
