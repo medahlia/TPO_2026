@@ -41,4 +41,8 @@ public class Matrix {
             System.out.println();
         }
     }
+
+    public void addValue(int row, int col, int value) {
+        matrix[row][col] += value;
+    }
 }

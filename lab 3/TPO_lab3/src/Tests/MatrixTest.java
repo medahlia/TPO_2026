@@ -128,4 +128,27 @@ class MatrixTest {
             }
         }
     }
+
+    @Test
+    void testFoxMultiplicationCorrectness() {
+        // Генеруємо дві сумісні матриці
+        Matrix a = Matrix.generateRandom(size, size);
+        Matrix b = Matrix.generateRandom(size, size);
+
+        // Послідовне множення
+        SequentialMethod seqMethod = new SequentialMethod();
+        Matrix expected = seqMethod.multiply(a, b);
+
+        // Множення через FoxMethod з 4 потоками
+        FoxMethod foxMethod = new FoxMethod(a, b, 4);
+        Matrix result = foxMethod.multiplyMatrix();
+
+        // Перевіряємо, що кожен елемент збігається
+        for (int i = 0; i < expected.getRows(); i++) {
+            for (int j = 0; j < expected.getCols(); j++) {
+                assertEquals(expected.getValue(i, j), result.getValue(i, j),
+                        "Елемент [" + i + "," + j + "] не збігається");
+            }
+        }
+    }
 }
