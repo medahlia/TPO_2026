@@ -1,4 +1,3 @@
-
 public class FoxMethod {
 
     private final Matrix a;
@@ -11,6 +10,7 @@ public class FoxMethod {
         this.b = b;
         this.result = new Matrix(a.getRows(), b.getCols());
 
+        //обмеження кількості потоків
         if (threadsNum > a.getRows() * b.getCols() / 4) {
             this.threadsNum = Math.max(a.getRows() * b.getCols() / 4, 1);
         } else {
@@ -24,8 +24,9 @@ public class FoxMethod {
         FoxProcessThread[] threads = new FoxProcessThread[threadsNum];
         int threadCounter = 0;
 
-        for (int i = 0; i < a.getRows(); i += blockSize) {
-            for (int j = 0; j < b.getCols(); j += blockSize) {
+        //створення потоків
+        for (int i = 0; i < a.getRows(); i += blockSize) { //по вертикалі
+            for (int j = 0; j < b.getCols(); j += blockSize) { //по горизонталі
                 threads[threadCounter] = new FoxProcessThread(a, b, i, j, blockSize, result);
                 threadCounter++;
             }
@@ -46,8 +47,7 @@ public class FoxMethod {
         return result;
     }
 
-    // ---------------------------------------------------------------
-    // Внутрішній клас потоку
+
     // ---------------------------------------------------------------
     private static class FoxProcessThread extends Thread {
 
@@ -78,14 +78,15 @@ public class FoxMethod {
             int aRowSize = checkSize(startRow, a.getRows());
             int bColSize = checkSize(startCol, b.getCols());
 
-            for (int k = 0; k < a.getCols(); k += blockSize) {
+            for (int k = 0; k < a.getCols(); k += blockSize) { //множення по діагоналі
                 int aColSize = checkSize(k, a.getCols());
                 int bRowSize = checkSize(k, b.getRows());
 
-                // отримуємо підматриці
+                //підматриці
                 Matrix blockA = sliceMatrix(a, startRow, startRow + aRowSize, k, k + aColSize);
                 Matrix blockB = sliceMatrix(b, k, k + bRowSize, startCol, startCol + bColSize);
 
+                //множення блоків
                 Matrix resBlock = new SequentialMethod().multiply(blockA, blockB);
 
                 for (int i = 0; i < resBlock.getRows(); i++)
@@ -94,7 +95,7 @@ public class FoxMethod {
             }
         }
 
-        // Метод для отримання підматриці
+        //отримання підматриці
         private Matrix sliceMatrix(Matrix m, int rowStart, int rowEnd, int colStart, int colEnd) {
             Matrix slice = new Matrix(rowEnd - rowStart, colEnd - colStart);
             for (int i = rowStart; i < rowEnd; i++)

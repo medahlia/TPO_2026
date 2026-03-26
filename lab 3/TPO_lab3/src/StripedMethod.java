@@ -10,18 +10,22 @@ public class StripedMethod {
         int aRows = a.getRows();
         int bCols = b.getCols();
         int commonDim = a.getCols();
+
         Matrix result = new Matrix(aRows, bCols);
 
         int rowsPerThread = aRows / threadsCount;
         ArrayList<Thread> threads = new ArrayList<>();
 
         for (int i = 0; i < threadsCount; i++) {
+            //межі рядків для кожного потоку
             int startRow = i * rowsPerThread;
             int endRow = (i == threadsCount - 1) ? aRows : (i + 1) * rowsPerThread;
 
             threads.add(new Thread(() -> {
                 for (int row = startRow; row < endRow; row++) {
+                    //проходимось по стовпцях
                     for (int col = 0; col < bCols; col++) {
+                        //обчислення одного елемента
                         int sum = 0;
                         for (int k = 0; k < commonDim; k++) {
                             sum += a.getValue(row, k) * b.getValue(k, col);
@@ -32,10 +36,8 @@ public class StripedMethod {
             }));
         }
 
-        // Запускаємо всі потоки
         for (Thread thread : threads) thread.start();
 
-        // Чекаємо завершення всіх потоків
         try {
             for (Thread thread : threads) thread.join();
         } catch (InterruptedException e) {
