@@ -14,6 +14,8 @@ public class SpeedUpTest {
             Matrix m1 = Matrix.generateRandom(matrixSizes[i], matrixSizes[i]);
             Matrix m2 = Matrix.generateRandom(matrixSizes[i], matrixSizes[i]);
 
+            warmUp(m1, m2);
+
             System.out.println("\nMatrix size: " + matrixSizes[i] + "x" + matrixSizes[i]);
             System.out.println("--------------------------------------------------------------------------------");
             System.out.printf("%-10s %-12s %-18s %-18s%n",
@@ -21,11 +23,7 @@ public class SpeedUpTest {
             System.out.println("--------------------------------------------------------------------------------");
 
             for (int j = 0; j < threadsNum.length; j++) {
-
-                // Sequential
                 long startTime = System.currentTimeMillis();
-                Matrix res1 = SequentialMethod.multiply(m1, m2);
-                testResults[i][j][0] = System.currentTimeMillis() - startTime;
 
                 // Striped
                 StripedMethod stripedMethod = new StripedMethod();
@@ -38,6 +36,11 @@ public class SpeedUpTest {
                 startTime = System.currentTimeMillis();
                 Matrix res3 = foxMethod.multiplyMatrix();
                 testResults[i][j][2] = System.currentTimeMillis() - startTime;
+
+                // Sequential
+
+                Matrix res1 = SequentialMethod.multiply(m1, m2);
+                testResults[i][j][0] = System.currentTimeMillis() - startTime;
 
                 if (!checkResults(res1, res2, res3)) {
                     throw new IllegalArgumentException(
@@ -69,5 +72,15 @@ public class SpeedUpTest {
                         r1.getValue(i, j) != r3.getValue(i, j))
                     return false;
         return true;
+    }
+
+    private static void warmUp(Matrix m1, Matrix m2) {
+        SequentialMethod.multiply(m1, m2);
+
+        StripedMethod striped = new StripedMethod();
+        striped.multiplyMatrix(m1, m2, 4);
+
+        FoxMethod fox = new FoxMethod(m1, m2, 4);
+        fox.multiplyMatrix();
     }
 }
