@@ -1,12 +1,8 @@
 public class SpeedUpTest {
 
     public static void main(String[] args) {
-        int[] matrixSizes = {500, 1000, 1500, 2000, 2500, 3000};
-        //int[] matrixSizes = {512, 992, 1504, 2016, 2496, 3008};
+        int[] matrixSizes = {512, 992, 1504, 2016, 2496, 3008};
         int[] threadsNum  = {2, 4, 8, 16, 32};
-
-        //int[] matrixSizes = {512, 992, 1504, 2016, 2496, 3008};
-        //int[] threadsNum  = {4, 9, 25};
 
         long[][][] testResults = new long[matrixSizes.length][threadsNum.length][3];
 
