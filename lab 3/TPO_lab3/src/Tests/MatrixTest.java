@@ -13,19 +13,21 @@ class MatrixTest {
 
         Matrix matrix = Matrix.generateRandom(rows, cols);
 
-        assertEquals(rows, matrix.getRows(), "Кількість рядків повинна відповідати");
-        assertEquals(cols, matrix.getCols(), "Кількість стовпців повинна відповідати");
+        assertEquals(rows, matrix.getRows(), "Row count should match");
+        assertEquals(cols, matrix.getCols(), "Column count should match");
 
+        /*
         for (int i = 0; i < matrix.getRows(); i++) {
             for (int j = 0; j < matrix.getCols(); j++) {
                 System.out.print(matrix.getValue(i, j) + " ");
             }
             System.out.println();
         }
+        */
     }
 
     @Test
-    // матриця не пуста, тобто заповнена випадковими числами
+    // матриця не пуста (заповнена випадковими числами)
     void generateRandom_shouldHaveNonZeroValues() {
         Matrix matrix = Matrix.generateRandom(size, size);
 
@@ -41,7 +43,7 @@ class MatrixTest {
             if (hasNonZero) break;
         }
 
-        assertTrue(hasNonZero, "Матриця повинна містити числа від 0 до 9");
+        assertTrue(hasNonZero, "Matrix should contain random values");
     }
 
     @Test
@@ -50,12 +52,11 @@ class MatrixTest {
         Matrix m1 = Matrix.generateRandom(size, size);
         Matrix m2 = Matrix.generateRandom(size, size);
 
-        // Можемо перевірити, що обʼєкти різні
-        assertNotSame(m1, m2, "Кожен виклик має створювати новий обʼєкт матриці");
+        assertNotSame(m1, m2, "Each call should create a new matrix instance");
     }
 
-    // перевірка на коректність обчислення послідовного методу
     @Test
+    // перевірка на коректність обчислення послідовного методу
     void multiply_shouldReturnCorrectResult() {
 
         Matrix m1 = new Matrix(2, 2);
@@ -78,8 +79,8 @@ class MatrixTest {
         assertEquals(50, result.getValue(1,1));
     }
 
-    // перевірка на коректність обчислення послідовного методу
     @Test
+    // перевірка на коректність обчислення послідовного методу
     void multiply_differentSizeMatrices_shouldReturnCorrectResult() {
 
         Matrix m1 = new Matrix(2, 3);
@@ -108,69 +109,66 @@ class MatrixTest {
 
     @Test
     void testStripedMultiplicationMatchesSequential() {
-        // Генеруємо випадкові матриці
         Matrix a = Matrix.generateRandom(size, size);
         Matrix b = Matrix.generateRandom(size, size);
 
-        // Послідовне множення
+        // послідовне множення
         SequentialMethod seqMethod = new SequentialMethod();
         Matrix expected = seqMethod.multiply(a, b);
 
-        // Паралельне множення (StripedMethod)
+        // паралельне множення (StripedMethod)
         StripedMethod stripedMethod = new StripedMethod();
         Matrix actual = stripedMethod.multiplyMatrix(a, b, 3); // 3 потоки
 
-        // Перевіряємо, що всі елементи збігаються
+        // перевірка, що всі елементи збігаються
         for (int i = 0; i < expected.getRows(); i++) {
             for (int j = 0; j < expected.getCols(); j++) {
                 assertEquals(expected.getValue(i, j), actual.getValue(i, j),
-                        "Елемент [" + i + "][" + j + "] не збігається");
+                        "Mismatch at [\" + i + \"][\" + j + \"]");
             }
         }
     }
 
     @Test
     void testFoxMultiplicationCorrectness() {
-        // Генеруємо дві сумісні матриці
         Matrix a = Matrix.generateRandom(size, size);
         Matrix b = Matrix.generateRandom(size, size);
 
-        // Послідовне множення
+        // послідовне множення
         SequentialMethod seqMethod = new SequentialMethod();
         Matrix expected = seqMethod.multiply(a, b);
 
-        // Множення через FoxMethod з 4 потоками
+        // множення через FoxMethod з 4 потоками
         FoxMethod foxMethod = new FoxMethod(a, b, 4);
         Matrix result = foxMethod.multiplyMatrix();
 
-        // Перевіряємо, що кожен елемент збігається
+        // перевірка, що кожен елемент збігається
         for (int i = 0; i < expected.getRows(); i++) {
             for (int j = 0; j < expected.getCols(); j++) {
                 assertEquals(expected.getValue(i, j), result.getValue(i, j),
-                        "Елемент [" + i + "," + j + "] не збігається");
+                        "Mismatch at [\" + i + \",\" + j + \"]");
             }
         }
     }
 
     @Test
     void testAllMethodsProduceSameResult() {
-        // Створимо невеликі матриці для тесту
         Matrix a = Matrix.generateRandom(5, 4);
         Matrix b = Matrix.generateRandom(4, 6);
 
-        // --- Sequential ---
+        // Sequential
         SequentialMethod seqMethod = new SequentialMethod();
         Matrix resSeq = seqMethod.multiply(a, b);
 
-        // --- Striped ---
+        // Striped
         StripedMethod stripedMethod = new StripedMethod();
         Matrix resStriped = stripedMethod.multiplyMatrix(a, b, 3);
 
-        // --- Fox ---
+        // Fox
         FoxMethod foxMethod = new FoxMethod(a, b, 3);
         Matrix resFox = foxMethod.multiplyMatrix();
 
-        // Перевірка, що всі значення співпадають
+        // перевірка, що всі значення співпадають
         int rows = resSeq.getRows();
         int cols = resSeq.getCols();
 
