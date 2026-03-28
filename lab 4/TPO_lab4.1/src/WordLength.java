@@ -52,27 +52,40 @@ public class WordLength {
     }
 
     static class Stats {
+
         private int count = 0;
         private int sum = 0;
-
-        private int max = Integer.MAX_VALUE;
-        private int min = Integer.MIN_VALUE;
+        private int min = Integer.MAX_VALUE;
+        private int max = Integer.MIN_VALUE;
 
         void add(int length) {
             count++;
             sum += length;
-            min = Math.min(min, length);
-            max = Math.max(max, length);
+
+            if (length < min) {
+                min = length;
+            }
+
+            if (length > max) {
+                max = length;
+            }
         }
 
         void merge(Stats other) {
+
+            if (other.count == 0) {
+                return;
+            }
+
             count += other.count;
             sum += other.sum;
+
             min = Math.min(min, other.min);
             max = Math.max(max, other.max);
         }
 
         void print() {
+
             double avg = (double) sum / count;
 
             System.out.println("Words: " + count);
