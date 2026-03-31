@@ -2,7 +2,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        String folder = "texts3";
+        String folder = "texts6";
 
         var texts = WordLength.readAllFiles(folder);
 
@@ -33,5 +33,7 @@ public class Main {
         System.out.println("Speedup: " + speedup);
         System.out.println("Threads: " + threads);
         System.out.println("Efficiency: " + efficiency);
+
+        System.out.println("Splits: " + WordLength.getSplitCount());
     }
 }

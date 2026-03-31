@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WordLength {
 
@@ -52,6 +53,10 @@ public class WordLength {
         }
     }
 
+    public static int getSplitCount() {
+        return TextTask.getSplitCount();
+    }
+
     static class Stats {
 
         private int count = 0;
@@ -98,6 +103,7 @@ public class WordLength {
 
     static class TextTask extends RecursiveTask<Stats> {
         private static final int THRESHOLD = 2; // для маленьких задач
+        private static final AtomicInteger splitCounter = new AtomicInteger(0);
 
         private final List<String> texts;
         private final int start;
@@ -121,6 +127,8 @@ public class WordLength {
 
             int middle = (start + end) / 2;
 
+            splitCounter.incrementAndGet();
+
             TextTask left = new TextTask(texts, start, middle);
             TextTask right = new TextTask(texts, middle, end);
 
@@ -130,6 +138,10 @@ public class WordLength {
 
             leftResult.merge(rightResult);
             return leftResult;
+        }
+
+        public static int getSplitCount() {
+            return splitCounter.get();
         }
 
     }
