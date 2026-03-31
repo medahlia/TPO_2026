@@ -2,38 +2,46 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        String folder = "texts6";
-
-        var texts = WordLength.readAllFiles(folder);
-
-        long startSeq = System.nanoTime();
-        var seq = WordLength.analyzeSequential(texts);
-        long endSeq = System.nanoTime();
-
-        long startPar = System.nanoTime();
-        var par = WordLength.analyzeParallel(texts);
-        long endPar = System.nanoTime();
-
-        double seqTime = (endSeq - startSeq) / 1e6;
-        double parTime = (endPar - startPar) / 1e6;
-
-        double speedup = seqTime / parTime;
-
+        int runs = 10;
         int threads = Runtime.getRuntime().availableProcessors();
-        double efficiency = speedup / threads;
 
-        System.out.println("Sequential time: " + seqTime);
-        seq.print();
+        for (int folderIndex = 1; folderIndex <= 7; folderIndex++) {
 
-        System.out.println();
+            String folder = "texts" + folderIndex;
 
-        System.out.println("Parallel time: " + parTime);
-        par.print();
+            double totalSpeedup = 0;
+            double totalEfficiency = 0;
 
-        System.out.println("Speedup: " + speedup);
-        System.out.println("Threads: " + threads);
-        System.out.println("Efficiency: " + efficiency);
+            var texts = WordLength.readAllFiles(folder);
 
-        System.out.println("Splits: " + WordLength.getSplitCount());
+            for (int i = 0; i < runs; i++) {
+
+                long startSeq = System.nanoTime();
+                var seq = WordLength.analyzeSequential(texts);
+                long endSeq = System.nanoTime();
+
+                long startPar = System.nanoTime();
+                var par = WordLength.analyzeParallel(texts);
+                long endPar = System.nanoTime();
+
+                double seqTime = (endSeq - startSeq) / 1e6;
+                double parTime = (endPar - startPar) / 1e6;
+
+                double speedup = seqTime / parTime;
+                double efficiency = speedup / threads;
+
+                totalSpeedup += speedup;
+                totalEfficiency += efficiency;
+            }
+
+            double avgSpeedup = totalSpeedup / runs;
+            double avgEfficiency = totalEfficiency / runs;
+
+            System.out.println("Folder: " + folder);
+            System.out.println("Files count: " + texts.size());
+            System.out.println("Average Speedup: " + avgSpeedup);
+            System.out.println("Average Efficiency: " + avgEfficiency);
+            System.out.println("-----------------------------");
+        }
     }
 }
