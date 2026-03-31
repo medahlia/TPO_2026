@@ -12,6 +12,7 @@ public class WordLength {
         return pool.invoke(new TextTask(texts, 0, texts.size()));
     }
 
+    // читання файлів
     public static List<String> readAllFiles(String folder) throws IOException {
         List<String> texts = new ArrayList<>();
 
@@ -96,7 +97,7 @@ public class WordLength {
     }
 
     static class TextTask extends RecursiveTask<Stats> {
-        private static final int THRESHOLD = 2;
+        private static final int THRESHOLD = 2; // для маленьких задач
 
         private final List<String> texts;
         private final int start;

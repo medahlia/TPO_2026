@@ -17,6 +17,11 @@ public class Main {
         double seqTime = (endSeq - startSeq) / 1e6;
         double parTime = (endPar - startPar) / 1e6;
 
+        double speedup = seqTime / parTime;
+
+        int threads = Runtime.getRuntime().availableProcessors();
+        double efficiency = speedup / threads;
+
         System.out.println("Sequential time: " + seqTime);
         seq.print();
 
@@ -25,6 +30,8 @@ public class Main {
         System.out.println("Parallel time: " + parTime);
         par.print();
 
-        System.out.println("Speedup: " + seqTime / parTime);
+        System.out.println("Speedup: " + speedup);
+        System.out.println("Threads: " + threads);
+        System.out.println("Efficiency: " + efficiency);
     }
 }
