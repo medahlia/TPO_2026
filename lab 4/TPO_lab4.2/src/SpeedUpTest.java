@@ -27,13 +27,18 @@ public class SpeedUpTest {
                 Matrix res2 = stripedMethod.multiplyMatrix(m1, m2, threadsNum[j]);
                 testResults[i][j][1] = System.currentTimeMillis() - startTime;
 
+                // Fox
+                FoxMethod foxMethod = new FoxMethod(m1, m2, threadsNum[j]);
+                startTime = System.currentTimeMillis();
+                Matrix res3 = foxMethod.multiplyMatrix();
+                testResults[i][j][2] = System.currentTimeMillis() - startTime;
 
                 // Sequential
 
                 Matrix res1 = SequentialMethod.multiply(m1, m2);
                 testResults[i][j][0] = System.currentTimeMillis() - startTime;
 
-                if (!checkResults(res1, res2)) {
+                if (!checkResults(res1, res2, res3)) {
                     throw new IllegalArgumentException(
                             "Incorrect results for size " + matrixSizes[i] + ", threads " + threadsNum[j]);
                 }
@@ -56,10 +61,11 @@ public class SpeedUpTest {
         }
     }
 
-    public static boolean checkResults(Matrix r1, Matrix r2) {
+    public static boolean checkResults(Matrix r1, Matrix r2, Matrix r3) {
         for (int i = 0; i < r1.getRows(); i++)
             for (int j = 0; j < r1.getCols(); j++)
-                if (r1.getValue(i, j) != r2.getValue(i, j))
+                if (r1.getValue(i, j) != r2.getValue(i, j) ||
+                        r1.getValue(i, j) != r3.getValue(i, j))
                     return false;
         return true;
     }
@@ -70,5 +76,7 @@ public class SpeedUpTest {
         StripedMethod striped = new StripedMethod();
         striped.multiplyMatrix(m1, m2, 4);
 
+        FoxMethod fox = new FoxMethod(m1, m2, 4);
+        fox.multiplyMatrix();
     }
 }

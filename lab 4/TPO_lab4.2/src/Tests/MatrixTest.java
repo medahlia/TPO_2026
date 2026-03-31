@@ -6,7 +6,7 @@ class MatrixTest {
     int size = 100;
 
     @Test
-    // матриця створюється з правильними рядками та стовпцями
+        // матриця створюється з правильними рядками та стовпцями
     void generateRandom_shouldCreateMatrixWithCorrectSize() {
         int rows = size;
         int cols = size;
@@ -27,7 +27,7 @@ class MatrixTest {
     }
 
     @Test
-    // матриця не пуста (заповнена випадковими числами)
+        // матриця не пуста (заповнена випадковими числами)
     void generateRandom_shouldHaveNonZeroValues() {
         Matrix matrix = Matrix.generateRandom(size, size);
 
@@ -47,7 +47,7 @@ class MatrixTest {
     }
 
     @Test
-    // кожен виклик створює новий об’єкт, а не повертає той самий
+        // кожен виклик створює новий об’єкт, а не повертає той самий
     void generateRandom_shouldAllowMultipleCalls() {
         Matrix m1 = Matrix.generateRandom(size, size);
         Matrix m2 = Matrix.generateRandom(size, size);
@@ -56,7 +56,7 @@ class MatrixTest {
     }
 
     @Test
-    // перевірка на коректність обчислення послідовного методу
+        // перевірка на коректність обчислення послідовного методу
     void multiply_shouldReturnCorrectResult() {
 
         Matrix m1 = new Matrix(2, 2);
@@ -80,7 +80,7 @@ class MatrixTest {
     }
 
     @Test
-    // перевірка на коректність обчислення послідовного методу
+        // перевірка на коректність обчислення послідовного методу
     void multiply_differentSizeMatrices_shouldReturnCorrectResult() {
 
         Matrix m1 = new Matrix(2, 3);
@@ -129,6 +129,27 @@ class MatrixTest {
         }
     }
 
+    @Test
+    void testFoxMultiplicationCorrectness() {
+        Matrix a = Matrix.generateRandom(size, size);
+        Matrix b = Matrix.generateRandom(size, size);
+
+        // послідовне множення
+        SequentialMethod seqMethod = new SequentialMethod();
+        Matrix expected = seqMethod.multiply(a, b);
+
+        // множення через FoxMethod з 4 потоками
+        FoxMethod foxMethod = new FoxMethod(a, b, 4);
+        Matrix result = foxMethod.multiplyMatrix();
+
+        // перевірка, що кожен елемент збігається
+        for (int i = 0; i < expected.getRows(); i++) {
+            for (int j = 0; j < expected.getCols(); j++) {
+                assertEquals(expected.getValue(i, j), result.getValue(i, j),
+                        "Mismatch at [\" + i + \",\" + j + \"]");
+            }
+        }
+    }
 
     @Test
     void testAllMethodsProduceSameResult() {
@@ -143,6 +164,9 @@ class MatrixTest {
         StripedMethod stripedMethod = new StripedMethod();
         Matrix resStriped = stripedMethod.multiplyMatrix(a, b, 3);
 
+        // Fox
+        FoxMethod foxMethod = new FoxMethod(a, b, 3);
+        Matrix resFox = foxMethod.multiplyMatrix();
 
         // перевірка, що всі значення співпадають
         int rows = resSeq.getRows();
@@ -152,6 +176,8 @@ class MatrixTest {
             for (int j = 0; j < cols; j++) {
                 assertEquals(resSeq.getValue(i, j), resStriped.getValue(i, j),
                         "Mismatch at [" + i + "," + j + "] between Sequential and Striped");
+                assertEquals(resSeq.getValue(i, j), resFox.getValue(i, j),
+                        "Mismatch at [" + i + "," + j + "] between Sequential and Fox");
             }
         }
     }
