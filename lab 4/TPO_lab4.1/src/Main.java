@@ -2,7 +2,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        String folder = "texts";
+        String folder = "texts3";
 
         var texts = WordLength.readAllFiles(folder);
 
