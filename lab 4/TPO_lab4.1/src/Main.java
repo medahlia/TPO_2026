@@ -1,47 +1,101 @@
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class Main {
 
     public static void main(String[] args) throws Exception {
 
         int runs = 10;
-        int threads = Runtime.getRuntime().availableProcessors();
+        int[] thresholds = {2};
+        int[] threadCounts = {2, 4, Runtime.getRuntime().availableProcessors()};
 
         for (int folderIndex = 1; folderIndex <= 7; folderIndex++) {
 
             String folder = "texts" + folderIndex;
+            // зберігання шляху
+            var paths = WordLength.readAllPaths(folder);
 
-            double totalSpeedup = 0;
-            double totalEfficiency = 0;
+            System.out.println("=============================");
+            System.out.println("Folder: " + folder);
+            System.out.println("Files count: " + paths.size());
 
-            var texts = WordLength.readAllFiles(folder);
+            int defaultThreads = Runtime.getRuntime().availableProcessors();
 
-            for (int i = 0; i < runs; i++) {
+            System.out.println("\n--- THRESHOLD experiment ---");
+            System.out.printf("%-12s %-15s %-15s%n", "Threshold", "Avg Speedup", "Avg Efficiency");
 
-                long startSeq = System.nanoTime();
-                var seq = WordLength.analyzeSequential(texts);
-                long endSeq = System.nanoTime();
+            WordLength.setThreadCount(defaultThreads);
 
-                long startPar = System.nanoTime();
-                var par = WordLength.analyzeParallel(texts);
-                long endPar = System.nanoTime();
+            for (int threshold : thresholds) {
+                WordLength.setThreshold(threshold);
 
-                double seqTime = (endSeq - startSeq) / 1e6;
-                double parTime = (endPar - startPar) / 1e6;
+                for (int w = 0; w < 3; w++) {
+                    WordLength.analyzeParallelPaths(paths);
+                }
 
-                double speedup = seqTime / parTime;
-                double efficiency = speedup / threads;
+                double totalSpeedup = 0;
 
-                totalSpeedup += speedup;
-                totalEfficiency += efficiency;
+                for (int i = 0; i < runs; i++) {
+                    System.gc(); Thread.sleep(50);
+                    long startSeq = System.nanoTime();
+
+                    for (Path p : paths) {
+                        String text = Files.readString(p);
+                        WordLength.Stats s = new WordLength.Stats();
+                        WordLength.analyzeTextRange(text, 0, text.length(), s);
+                    }
+                    long endSeq = System.nanoTime();
+
+                    System.gc(); Thread.sleep(50);
+                    long startPar = System.nanoTime();
+                    WordLength.analyzeParallelPaths(paths);
+                    long endPar = System.nanoTime();
+
+                    totalSpeedup += (endSeq - startSeq) / (double)(endPar - startPar);
+                }
+
+                double avgSpeedup = totalSpeedup / runs;
+                System.out.printf("%-12d %-15.3f %-15.3f%n",
+                        threshold, avgSpeedup, avgSpeedup / defaultThreads);
             }
 
-            double avgSpeedup = totalSpeedup / runs;
-            double avgEfficiency = totalEfficiency / runs;
+            // --- THREADS experiment ---
+            System.out.println("\n--- THREADS experiment ---");
+            System.out.printf("%-12s %-15s %-15s%n", "Threads", "Avg Speedup", "Avg Efficiency");
 
-            System.out.println("Folder: " + folder);
-            System.out.println("Files count: " + texts.size());
-            System.out.println("Average Speedup: " + avgSpeedup);
-            System.out.println("Average Efficiency: " + avgEfficiency);
-            System.out.println("-----------------------------");
+            WordLength.setThreshold(2);
+
+            for (int threadCount : threadCounts) {
+                WordLength.setThreadCount(threadCount);
+
+                for (int w = 0; w < 3; w++) {
+                    WordLength.analyzeParallelPaths(paths);
+                }
+
+                double totalSpeedup = 0;
+
+                for (int i = 0; i < runs; i++) {
+                    System.gc(); Thread.sleep(50);
+                    long startSeq = System.nanoTime();
+                    for (Path p : paths) {
+                        String text = Files.readString(p);
+                        WordLength.Stats s = new WordLength.Stats();
+                        WordLength.analyzeTextRange(text, 0, text.length(), s);
+                    }
+                    long endSeq = System.nanoTime();
+
+                    System.gc(); Thread.sleep(50);
+                    long startPar = System.nanoTime();
+                    WordLength.analyzeParallelPaths(paths);
+                    long endPar = System.nanoTime();
+
+                    totalSpeedup += (endSeq - startSeq) / (double)(endPar - startPar);
+                }
+
+                double avgSpeedup = totalSpeedup / runs;
+                System.out.printf("%-12d %-15.3f %-15.3f%n",
+                        threadCount, avgSpeedup, avgSpeedup / threadCount);
+            }
         }
     }
 }

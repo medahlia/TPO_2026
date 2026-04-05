@@ -70,6 +70,7 @@ class WordLengthTest {
         assertTrue(WordLength.getSplitCount() >= 0);
     }
 
+
     // helper methods
 
     private int getCount(WordLength.Stats stats) {
