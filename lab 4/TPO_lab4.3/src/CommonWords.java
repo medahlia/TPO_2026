@@ -8,12 +8,12 @@ import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 
 /**
- * Пошук спільних слів у текстових документах за допомогою ForkJoin Framework.
- * Базується на прикладі з: https://www.oracle.com/technical-resources/articles/java/fork-join.html
+ * Finding common words in text documents using the ForkJoin Framework.
+ * Based on the example from: https://www.oracle.com/technical-resources/articles/java/fork-join.html
  */
 public class CommonWords {
 
-    // Пул потоків для паралельного виконання
+    // Thread pool for parallel execution
     private static final ForkJoinPool pool = new ForkJoinPool();
 
     public static int getThreadCount() {
@@ -21,7 +21,7 @@ public class CommonWords {
     }
 
     // -------------------------------------------------------------------------
-    // Модель даних
+    // Data model
     // -------------------------------------------------------------------------
 
     static class Document {
@@ -67,7 +67,7 @@ public class CommonWords {
     }
 
     // -------------------------------------------------------------------------
-    // Послідовний (однопотоковий) алгоритм
+    // Sequential (single-threaded) algorithm
     // -------------------------------------------------------------------------
 
     Set<String> findCommonWordsSequential(Folder root) {
@@ -94,12 +94,12 @@ public class CommonWords {
                 accumulated.retainAll(words);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Помилка читання файлу", e);
+            throw new RuntimeException("Error reading file", e);
         }
     }
 
     // -------------------------------------------------------------------------
-    // Паралельний алгоритм (ForkJoin)
+    // Parallel algorithm (ForkJoin)
     // -------------------------------------------------------------------------
 
     Set<String> findCommonWordsParallel(Folder root) {
@@ -107,8 +107,8 @@ public class CommonWords {
     }
 
     /**
-     * Задача для обробки однієї папки: форкує підзадачі для підпапок,
-     * а файли у поточній папці обробляє безпосередньо.
+     * Task for processing a single folder: forks subtasks for subfolders,
+     * processes files in the current folder directly.
      */
     static class FolderTask extends RecursiveTask<Set<String>> {
         private final Folder target;
@@ -119,7 +119,7 @@ public class CommonWords {
 
         @Override
         protected Set<String> compute() {
-            // Спочатку запускаємо підзадачі для підпапок асинхронно
+            // Fork subtasks for subfolders asynchronously first
             List<FolderTask> subTasks = new ArrayList<>();
             for (Folder sub : target.nestedFolders) {
                 FolderTask worker = new FolderTask(sub);
@@ -127,7 +127,7 @@ public class CommonWords {
                 worker.fork();
             }
 
-            // Паралельно обробляємо файли поточної папки
+            // Process files in the current folder
             Set<String> current = null;
             for (Document file : target.files) {
                 DocumentTask fw = new DocumentTask(file);
@@ -140,7 +140,7 @@ public class CommonWords {
                 }
             }
 
-            // Збираємо результати підзадач
+            // Collect subtask results
             for (FolderTask st : subTasks) {
                 Set<String> subResult = st.join();
                 if (current == null) {
@@ -156,7 +156,7 @@ public class CommonWords {
     }
 
     /**
-     * Задача для обробки одного файлу. Якщо файл великий — ділить на шматки.
+     * Task for processing a single file. Splits into chunks if the file is large.
      */
     static class DocumentTask extends RecursiveTask<Set<String>> {
         private static final int CHUNK_SIZE = 10_000;
@@ -175,7 +175,7 @@ public class CommonWords {
                 }
                 return processInChunks(text);
             } catch (IOException e) {
-                throw new RuntimeException("Помилка читання файлу", e);
+                throw new RuntimeException("Error reading file", e);
             }
         }
 
@@ -187,7 +187,7 @@ public class CommonWords {
                 subtasks.add(sub);
                 sub.fork();
             }
-            // Об'єднання: шматки одного файлу — union (всі слова файлу)
+            // Merge chunks: union of all words in the file
             Set<String> merged = new HashSet<>();
             for (DocumentTask sub : subtasks) {
                 merged.addAll(sub.join());
@@ -200,7 +200,7 @@ public class CommonWords {
             int start = 0;
             while (start < text.length()) {
                 int end = Math.min(start + CHUNK_SIZE, text.length());
-                // Не розривати слово посередині
+                // Do not split words in the middle
                 if (end < text.length() && text.charAt(end) != ' ') {
                     while (end > start && text.charAt(end) != ' ') end--;
                 }
@@ -212,13 +212,15 @@ public class CommonWords {
     }
 
     // -------------------------------------------------------------------------
-    // Утиліта: витягнути унікальні слова з тексту
+    // Utility: extract unique words from text
     // -------------------------------------------------------------------------
 
     static Set<String> extractWords(String text) {
         return Arrays.stream(text.split("\\W+"))
-                .filter(w -> !w.isEmpty())
                 .map(String::toLowerCase)
+                .filter(w -> !w.isEmpty())
+                .filter(w -> w.matches("[a-z]+"))              // letters only, no digits
+                .filter(w -> w.length() > 1 || w.equals("a")) // single letters: only article "a"
                 .collect(Collectors.toSet());
     }
 }

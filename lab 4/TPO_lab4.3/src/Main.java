@@ -4,42 +4,46 @@ import java.util.Set;
 public class Main {
 
     public static void main(String[] args) {
-        // Шлях до папки з текстовими файлами
-        String targetPath = "D:\\tpo\\lab-4-docs\\texts";
+        // Path to the folder with text files
+        String targetPath = "/Users/home/TPO_2026/lab 4/TPO_lab4.1/texts7";
         CommonWords.Folder root = CommonWords.Folder.load(new File(targetPath));
 
         CommonWords analyzer = new CommonWords();
 
-        // --- Однопотокове виконання ---
+        // --- JVM warm-up (result is discarded) ---
+        analyzer.findCommonWordsSequential(root);
+        analyzer.findCommonWordsParallel(root);
+
+        // --- Single-threaded execution ---
         long t1Start = System.nanoTime();
         Set<String> seqResult = analyzer.findCommonWordsSequential(root);
         long t1End = System.nanoTime();
         double seqMs = (t1End - t1Start) / 1_000_000.0;
 
-        System.out.println("=== Однопотоковий режим ===");
-        System.out.printf("Час виконання: %.2f мс%n", seqMs);
-        System.out.println("Спільні слова: " + seqResult);
+        System.out.println("=== Single-threaded mode ===");
+        System.out.printf("Execution time: %.2f ms%n", seqMs);
+        System.out.println("Common words: " + seqResult);
 
         System.out.println();
 
-        // --- Паралельне виконання (ForkJoin) ---
+        // --- Parallel execution (ForkJoin) ---
         int threadCount = CommonWords.getThreadCount();
         long t2Start = System.nanoTime();
         Set<String> parResult = analyzer.findCommonWordsParallel(root);
         long t2End = System.nanoTime();
         double parMs = (t2End - t2Start) / 1_000_000.0;
 
-        System.out.println("=== Паралельний режим (ForkJoin) ===");
-        System.out.printf("Кількість потоків: %d%n", threadCount);
-        System.out.printf("Час виконання: %.2f мс%n", parMs);
-        System.out.println("Спільні слова: " + parResult);
+        System.out.println("=== Parallel mode (ForkJoin) ===");
+        System.out.printf("Thread count: %d%n", threadCount);
+        System.out.printf("Execution time: %.2f ms%n", parMs);
+        System.out.println("Common words: " + parResult);
 
         System.out.println();
 
-        // --- Метрики ---
+        // --- Metrics ---
         double speedup = seqMs / parMs;
         double efficiency = speedup / threadCount;
-        System.out.printf("Прискорення (speedup): %.2f x%n", speedup);
-        System.out.printf("Ефективність (efficiency): %.4f%n", efficiency);
+        System.out.printf("Speedup: %.2f x%n", speedup);
+        System.out.printf("Efficiency: %.4f%n", efficiency);
     }
 }
