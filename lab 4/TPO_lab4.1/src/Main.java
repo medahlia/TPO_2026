@@ -11,7 +11,8 @@ public class Main {
 
         for (int folderIndex = 1; folderIndex <= 7; folderIndex++) {
 
-            String folder = "texts" + folderIndex;
+
+            String folder = "texts/texts" + folderIndex;
             // зберігання шляху
             var paths = WordLength.readAllPaths(folder);
 
