@@ -5,7 +5,7 @@ public class Main {
 
     public static void main(String[] args) {
         // Path to the folder with text files
-        String targetPath = "/Users/home/TPO_2026/lab 4/TPO_lab4.1/texts7";
+        String targetPath = "/Users/home/TPO_2026/lab 4/TPO_lab4.1/texts";
         CommonWords.Folder root = CommonWords.Folder.load(new File(targetPath));
 
         CommonWords analyzer = new CommonWords();
