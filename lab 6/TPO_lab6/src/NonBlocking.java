@@ -21,8 +21,8 @@ public class NonBlocking {
         }
 
         int numWorkers = numProcs - 1;
-        int[] sizes = {100, 500, 1000, 1500, 2000};
-        int iterations = 8;
+        int[] sizes = {500, 1000, 1500, 2000, 2500, 3000};
+        int iterations = 10;
 
         if (rank == MASTER) {
             System.out.printf("Non-Blocking MPI — %d processes%n%n", numProcs);

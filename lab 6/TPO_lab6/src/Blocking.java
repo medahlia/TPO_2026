@@ -22,7 +22,7 @@ public class Blocking {
 
         int numWorkers = numProcs - 1;
         int[] sizes = {100, 500, 1000, 1500, 2000};
-        int iterations = 8;
+        int iterations = 10;
 
         if (rank == MASTER) {
             System.out.printf("Blocking MPI — %d processes%n%n", numProcs);
