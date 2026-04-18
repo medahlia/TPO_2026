@@ -39,12 +39,11 @@ public class NonBlocking {
                     int extra = n % numWorkers;
                     int offset = 0;
 
-                    // Зберігаємо subA окремо — буфер Isend має жити до Waitall
                     double[][] subAs = new double[numWorkers][];
 
                     long start = System.currentTimeMillis();
 
-                    // ── Небасуюча розсилка: 4 повідомлення на кожен worker ─
+                    // 4 повідомлення на кожен worker
                     Request[] sendReqs = new Request[numWorkers * 4];
 
                     for (int dest = 1; dest <= numWorkers; dest++) {

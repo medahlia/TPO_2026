@@ -5,13 +5,10 @@ public class Main {
 
     static final int MASTER = 0;
 
-    // =========================================================
-    // ── Точка входу ──────────────────────────────────────────
-    // =========================================================
     public static void main(String[] args) throws Exception {
         MPI.Init(args);
 
-        int rank     = MPI.COMM_WORLD.Rank();
+        int rank = MPI.COMM_WORLD.Rank(); // номер процесу
         int numProcs = MPI.COMM_WORLD.Size();
 
         if (numProcs < 2) {
@@ -28,11 +25,9 @@ public class Main {
             System.out.printf("Processes: %d%n%n", numProcs);
             System.out.printf("%-8s | %-14s | %-14s | %-14s | %-14s%n",
                     "Size", "Sequential", "OneToAll", "AllToOne", "AllToAll");
-            //System.out.println("-".repeat(74));
         }
 
         for (int n : sizes) {
-            // Матриці генеруються у всіх процесах однаково (seed фіксований)
             double[] matA = randomMatrix(n * n, n);
             double[] matB = randomMatrix(n * n, n + 1);
 
@@ -40,14 +35,14 @@ public class Main {
 
             for (int iter = 0; iter < iterations; iter++) {
 
-                // ── Sequential (тільки master) ────────────────────────
+                // Sequential
                 if (rank == MASTER) {
                     long t = System.currentTimeMillis();
                     multiplySequential(matA, matB, n);
                     seqTime += System.currentTimeMillis() - t;
                 }
 
-                // ── One-To-All: Scatterv + Bcast → Gatherv ────────────
+                // One-To-All
                 MPI.COMM_WORLD.Barrier();
                 {
                     long t = System.currentTimeMillis();
@@ -55,7 +50,7 @@ public class Main {
                     if (rank == MASTER) oneToAllTime += System.currentTimeMillis() - t;
                 }
 
-                // ── All-To-One: Scatterv + Bcast → Reduce ─────────────
+                // All-To-One
                 MPI.COMM_WORLD.Barrier();
                 {
                     long t = System.currentTimeMillis();
@@ -63,7 +58,7 @@ public class Main {
                     if (rank == MASTER) allToOneTime += System.currentTimeMillis() - t;
                 }
 
-                // ── All-To-All: Scatterv + Allgatherv ─────────────────
+                // All-To-All
                 MPI.COMM_WORLD.Barrier();
                 {
                     long t = System.currentTimeMillis();
@@ -85,9 +80,6 @@ public class Main {
         MPI.Finalize();
     }
 
-    // =========================================================
-    // ── Sequential ───────────────────────────────────────────
-    // =========================================================
     static double[] multiplySequential(double[] A, double[] B, int n) {
         double[] C = new double[n * n];
         for (int i = 0; i < n; i++) {
@@ -102,28 +94,22 @@ public class Main {
         return C;
     }
 
-    // =========================================================
-    // ── One-To-All: Scatterv + Bcast → Gatherv ───────────────
-    // Один процес (master) розподіляє дані → всі отримують
-    // Один процес (master) збирає результати ← від усіх
-    // =========================================================
+    // One-To-All: Scatterv + Bcast → Gatherv
     static double[] multiplyOneToAll(
             double[] matA, double[] matB, int n,
             int rank, int numProcs) throws Exception {
 
-        // ── Розподіл рядків між процесами ─────────────────────
+        // розподіл рядків між процесами
         int[] rowCounts = rowCounts(n, numProcs);
-        int[] offsets   = offsets(rowCounts);
+        int[] offsets = offsets(rowCounts);
 
-        // sendcounts і displs у елементах double (не рядках)
         int[] sendCounts = new int[numProcs];
-        int[] displs     = new int[numProcs];
+        int[] displs = new int[numProcs]; // displacements
         for (int i = 0; i < numProcs; i++) {
             sendCounts[i] = rowCounts[i] * n;
-            displs[i]     = offsets[i]   * n;
+            displs[i] = offsets[i] * n;
         }
 
-        // ── Scatterv: master розсилає шматки A кожному процесу ─
         int localRows = rowCounts[rank];
         double[] localA = new double[localRows * n];
 
@@ -133,15 +119,10 @@ public class Main {
                 MASTER
         );
 
-        // ── Bcast: master надсилає повну матрицю B всім ─────────
-        // (One-To-All: один відправник, всі отримувачі)
         MPI.COMM_WORLD.Bcast(matB, 0, n * n, MPI.DOUBLE, MASTER);
 
-        // ── Локальне множення ────────────────────────────────────
         double[] localC = multiplyBlock(localA, matB, localRows, n);
 
-        // ── Gatherv: master збирає результати від усіх ──────────
-        // (All-To-One за напрямком: всі надсилають → один отримує)
         int[] recvCounts = new int[numProcs];
         for (int i = 0; i < numProcs; i++) {
             recvCounts[i] = rowCounts[i] * n;
@@ -158,27 +139,19 @@ public class Main {
         return resultC;
     }
 
-    // =========================================================
-    // ── All-To-One: Scatterv + Bcast → Reduce ────────────────
-    // Відрізняється від OneToAll способом збирання результату:
-    // замість Gatherv використовується Reduce(SUM) —
-    // кожен процес надсилає повну матрицю C з нулями
-    // на позиціях "чужих" рядків, Reduce підсумовує їх.
-    // Це справжній All-To-One: всі процеси беруть участь
-    // у формуванні єдиного результату через редукцію.
-    // =========================================================
+    // All-To-One: Scatterv + Bcast → Reduce
     static double[] multiplyAllToOne(
             double[] matA, double[] matB, int n,
             int rank, int numProcs) throws Exception {
 
         int[] rowCounts = rowCounts(n, numProcs);
-        int[] offsets   = offsets(rowCounts);
+        int[] offsets = offsets(rowCounts);
 
         int[] sendCounts = new int[numProcs];
-        int[] displs     = new int[numProcs];
+        int[] displs = new int[numProcs];
         for (int i = 0; i < numProcs; i++) {
             sendCounts[i] = rowCounts[i] * n;
-            displs[i]     = offsets[i]   * n;
+            displs[i] = offsets[i] * n;
         }
 
         int localRows = rowCounts[rank];
@@ -214,26 +187,19 @@ public class Main {
         return resultC;
     }
 
-    // =========================================================
-    // ── All-To-All: Scatterv + Allgatherv ────────────────────
-    // Відрізняється від OneToAll способом збирання результату:
-    // замість Gatherv (результат тільки у master)
-    // використовується Allgatherv — КОЖЕН процес отримує
-    // повну результуючу матрицю C.
-    // Це справжній All-To-All: всі надсилають і всі отримують.
-    // =========================================================
+    // All-To-All: Scatterv + Allgatherv
     static double[] multiplyAllToAll(
             double[] matA, double[] matB, int n,
             int rank, int numProcs) throws Exception {
 
         int[] rowCounts = rowCounts(n, numProcs);
-        int[] offsets   = offsets(rowCounts);
+        int[] offsets = offsets(rowCounts);
 
         int[] sendCounts = new int[numProcs];
-        int[] displs     = new int[numProcs];
+        int[] displs = new int[numProcs];
         for (int i = 0; i < numProcs; i++) {
             sendCounts[i] = rowCounts[i] * n;
-            displs[i]     = offsets[i]   * n;
+            displs[i] = offsets[i] * n;
         }
 
         int localRows = rowCounts[rank];
@@ -249,15 +215,12 @@ public class Main {
 
         double[] localC = multiplyBlock(localA, matB, localRows, n);
 
-        // ── Allgatherv: кожен надсилає свій localC,
-        //    кожен отримує повну матрицю C ──────────────────────
-        // (All-To-All: всі беруть участь, всі отримують результат)
         int[] recvCounts = new int[numProcs];
         for (int i = 0; i < numProcs; i++) {
             recvCounts[i] = rowCounts[i] * n;
         }
 
-        double[] resultC = new double[n * n]; // є у КОЖНОГО процесу
+        double[] resultC = new double[n * n];
 
         MPI.COMM_WORLD.Allgatherv(
                 localC,  0, localRows * n, MPI.DOUBLE,
@@ -267,11 +230,8 @@ public class Main {
         return resultC;
     }
 
-    // =========================================================
-    // ── Допоміжні методи ─────────────────────────────────────
-    // =========================================================
 
-    // Множення блоку: localA (rows×n) × B (n×n) = localC (rows×n)
+    // множення блоку: localA (rows×n) × B (n×n) = localC (rows×n)
     static double[] multiplyBlock(double[] localA, double[] B, int rows, int n) {
         double[] localC = new double[rows * n];
         for (int i = 0; i < rows; i++) {
@@ -286,7 +246,7 @@ public class Main {
         return localC;
     }
 
-    // Кількість рядків для кожного процесу (рівномірний поділ)
+    // кількість рядків для кожного процесу (рівномірний поділ)
     static int[] rowCounts(int n, int numProcs) {
         int base  = n / numProcs;
         int extra = n % numProcs;
@@ -297,7 +257,7 @@ public class Main {
         return counts;
     }
 
-    // Зміщення (prefix sum від rowCounts)
+    // зміщення
     static int[] offsets(int[] rowCounts) {
         int[] offsets = new int[rowCounts.length];
         for (int i = 1; i < rowCounts.length; i++) {
@@ -306,7 +266,6 @@ public class Main {
         return offsets;
     }
 
-    // Генерація матриці з фіксованим seed для відтворюваності
     static double[] randomMatrix(int size, long seed) {
         Random rng    = new Random(seed);
         double[] data = new double[size];
