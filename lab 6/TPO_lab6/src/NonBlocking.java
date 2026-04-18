@@ -46,6 +46,7 @@ public class NonBlocking {
                     // 4 повідомлення на кожен worker
                     Request[] sendReqs = new Request[numWorkers * 4];
 
+                    // розсилка даних
                     for (int dest = 1; dest <= numWorkers; dest++) {
                         int rows = (dest <= extra) ? base + 1 : base;
                         int idx  = (dest - 1) * 4;
@@ -54,7 +55,7 @@ public class NonBlocking {
                         int[] rowArr = new int[]{rows};
                         double[] subA = new double[rows * n];
                         System.arraycopy(matA, offset * n, subA, 0, rows * n);
-                        subAs[dest - 1] = subA; // утримуємо буфер живим
+                        subAs[dest - 1] = subA;
 
                         sendReqs[idx]     = MPI.COMM_WORLD.Isend(offArr, 0, 1,        MPI.INT,    dest, TAG_TO_WORK);
                         sendReqs[idx + 1] = MPI.COMM_WORLD.Isend(rowArr, 0, 1,        MPI.INT,    dest, TAG_TO_WORK);
@@ -66,7 +67,7 @@ public class NonBlocking {
 
                     Request.Waitall(sendReqs); // чекаємо завершення всіх відправлень
 
-                    // ── Небасуючий прийом offset і rows від усіх worker-ів ─
+                    // прийом метаданих
                     int[][] recvOffsets = new int[numWorkers][1];
                     int[][] recvRows = new int[numWorkers][1];
                     Request[] metaReqs = new Request[numWorkers * 2];
@@ -79,9 +80,9 @@ public class NonBlocking {
                         metaReqs[idx + 1] = MPI.COMM_WORLD.Irecv(recvRows[src - 1],    0, 1, MPI.INT, src, TAG_TO_MAST);
                     }
 
-                    Request.Waitall(metaReqs); // чекаємо всі метадані
+                    Request.Waitall(metaReqs);
 
-                    // ── Приймаємо субматриці C (розмір відомий після метаданих) ─
+
                     for (int src = 1; src <= numWorkers; src++) {
                         int off = recvOffsets[src - 1][0];
                         int rows = recvRows[src - 1][0];
@@ -98,11 +99,10 @@ public class NonBlocking {
             }
 
         } else {
-            // ── Worker: обробляємо sizes.length * iterations раундів ──────
             for (int round = 0; round < sizes.length * iterations; round++) {
                 int n = sizes[round / iterations];
 
-                // ── Небасуючий прийом метаданих ───────────────────────────
+                // метадані | розмір буфера ще невідомий
                 int[] recvOffset = new int[1];
                 int[] recvRows = new int[1];
                 Request[] metaReqs = new Request[2];
@@ -113,7 +113,7 @@ public class NonBlocking {
                 int offset = recvOffset[0];
                 int rows = recvRows[0];
 
-                // ── Небасуючий прийом даних ───────────────────────────────
+                // основні дані
                 double[] subA = new double[rows * n];
                 double[] matB = new double[n * n];
                 Request[] dataReqs = new Request[2];
@@ -121,7 +121,7 @@ public class NonBlocking {
                 dataReqs[1] = MPI.COMM_WORLD.Irecv(matB, 0, n * n,    MPI.DOUBLE, MASTER, TAG_TO_WORK);
                 Request.Waitall(dataReqs);
 
-                // ── Множення ─────────────────────────────────────────────
+                // множення
                 double[] subC = new double[rows * n];
                 for (int i = 0; i < rows; i++) {
                     for (int k = 0; k < n; k++) {
@@ -133,7 +133,6 @@ public class NonBlocking {
                     }
                 }
 
-                // ── Небасуюча відправка результатів ──────────────────────
                 Request[] sendReqs = new Request[3];
                 sendReqs[0] = MPI.COMM_WORLD.Isend(new int[]{offset}, 0, 1,        MPI.INT,    MASTER, TAG_TO_MAST);
                 sendReqs[1] = MPI.COMM_WORLD.Isend(new int[]{rows},   0, 1,        MPI.INT,    MASTER, TAG_TO_MAST);

@@ -41,7 +41,7 @@ public class Blocking {
 
                     long start = System.currentTimeMillis();
 
-                    // ── Розсилаємо шматки A і повну B кожному worker-у ───
+
                     for (int dest = 1; dest <= numWorkers; dest++) {
                         int rows = (dest <= extra) ? base + 1 : base;
 
@@ -56,7 +56,7 @@ public class Blocking {
                         offset += rows;
                     }
 
-                    // ── Збираємо результати від кожного worker-а ─────────
+
                     for (int src = 1; src <= numWorkers; src++) {
                         int[] recvOffset = new int[1];
                         int[] recvRows   = new int[1];
@@ -80,7 +80,6 @@ public class Blocking {
             }
 
         } else {
-            // ── Worker: обробляємо sizes.length * iterations раундів ──────
             for (int round = 0; round < sizes.length * iterations; round++) {
                 int n = sizes[round / iterations];
 
@@ -99,7 +98,6 @@ public class Blocking {
                 MPI.COMM_WORLD.Recv(subA, 0, rows * n, MPI.DOUBLE, MASTER, TAG_TO_WORK);
                 MPI.COMM_WORLD.Recv(matB, 0, n * n,    MPI.DOUBLE, MASTER, TAG_TO_WORK);
 
-                // ── Множення: subA (rows×n) × matB (n×n) = subC (rows×n) ─
                 double[] subC = new double[rows * n];
                 for (int i = 0; i < rows; i++) {
                     for (int k = 0; k < n; k++) {
