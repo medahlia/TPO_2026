@@ -18,7 +18,7 @@ public class Main {
             return;
         }
 
-        int[] sizes    = {500, 1000, 1500, 2000};
+        int[] sizes = {500, 1000, 1500, 2000};
         int iterations = 10;
 
         if (rank == MASTER) {
@@ -165,14 +165,10 @@ public class Main {
 
         MPI.COMM_WORLD.Bcast(matB, 0, n * n, MPI.DOUBLE, MASTER);
 
-        // ── Локальне множення: заповнюємо тільки "свої" рядки ───
-        // Решта залишаються нулями — Reduce(SUM) їх проігнорує
         double[] localC = new double[n * n];
-        double[] block  = multiplyBlock(localA, matB, localRows, n);
+        double[] block = multiplyBlock(localA, matB, localRows, n);
         System.arraycopy(block, 0, localC, offsets[rank] * n, localRows * n);
 
-        // ── Reduce(SUM): всі надсилають свій localC → master ────
-        // (All-To-One: всі процеси беруть участь, один отримує)
         double[] resultC = new double[n * n];
 
         MPI.COMM_WORLD.Reduce(
@@ -207,7 +203,7 @@ public class Main {
 
         MPI.COMM_WORLD.Scatterv(
                 matA, 0, sendCounts, displs, MPI.DOUBLE,
-                localA, 0, localRows * n,    MPI.DOUBLE,
+                localA, 0, localRows * n, MPI.DOUBLE,
                 MASTER
         );
 
