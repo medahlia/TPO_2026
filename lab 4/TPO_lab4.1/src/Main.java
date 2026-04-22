@@ -22,8 +22,8 @@ public class Main {
 
             int defaultThreads = Runtime.getRuntime().availableProcessors();
 
-            System.out.println("\n--- THRESHOLD experiment ---");
-            System.out.printf("%-12s %-15s %-15s%n", "Threshold", "Avg Speedup", "Avg Efficiency");
+            //System.out.println("\n--- THRESHOLD experiment ---");
+            //System.out.printf("%-12s %-15s %-15s%n", "Threshold", "Avg Speedup", "Avg Efficiency");
 
             WordLength.setThreadCount(defaultThreads);
 
@@ -56,8 +56,8 @@ public class Main {
                 }
 
                 double avgSpeedup = totalSpeedup / runs;
-                System.out.printf("%-12d %-15.3f %-15.3f%n",
-                        threshold, avgSpeedup, avgSpeedup / defaultThreads);
+                //System.out.printf("%-12d %-15.3f %-15.3f%n",
+                 //       threshold, avgSpeedup, avgSpeedup / defaultThreads);
             }
 
             // --- THREADS experiment ---

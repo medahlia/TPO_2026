@@ -4,7 +4,9 @@ import java.util.Set;
 public class Main {
 
     public static void main(String[] args) {
-        // Path to the folder with text files
+
+        int runs = 5;
+
         for (int indexFolder = 1; indexFolder <= 7; indexFolder++) {
 
             String targetPath = "/Users/home/TPO_2026/lab 4/TPO_lab4.1/texts/texts" + indexFolder;
@@ -16,40 +18,48 @@ public class Main {
             System.out.println("=============================");
             System.out.println("Folder: " + folder);
 
-
-            // --- JVM warm-up (result is discarded) ---
+            // --- JVM warm-up ---
             analyzer.findCommonWordsSequential(root);
             analyzer.findCommonWordsParallel(root);
 
-            // --- Single-threaded execution ---
-            long t1Start = System.nanoTime();
-            Set<String> seqResult = analyzer.findCommonWordsSequential(root);
-            long t1End = System.nanoTime();
-            double seqMs = (t1End - t1Start) / 1_000_000.0;
+            double totalSeq = 0;
+            double totalPar = 0;
 
-            System.out.println("=== Single-threaded mode ===");
-            System.out.printf("Execution time: %.2f ms%n", seqMs);
-            System.out.println("Common words: " + seqResult);
+            Set<String> seqResult = null;
+            Set<String> parResult = null;
 
-            System.out.println();
+            for (int i = 0; i < runs; i++) {
 
-            // --- Parallel execution (ForkJoin) ---
+                // --- Sequential ---
+                long t1Start = System.nanoTime();
+                seqResult = analyzer.findCommonWordsSequential(root);
+                long t1End = System.nanoTime();
+                totalSeq += (t1End - t1Start);
+
+                // --- Parallel ---
+                long t2Start = System.nanoTime();
+                parResult = analyzer.findCommonWordsParallel(root);
+                long t2End = System.nanoTime();
+                totalPar += (t2End - t2Start);
+            }
+
+            double avgSeqMs = totalSeq / runs / 1_000_000.0;
+            double avgParMs = totalPar / runs / 1_000_000.0;
+
             int threadCount = CommonWords.getThreadCount();
-            long t2Start = System.nanoTime();
-            Set<String> parResult = analyzer.findCommonWordsParallel(root);
-            long t2End = System.nanoTime();
-            double parMs = (t2End - t2Start) / 1_000_000.0;
 
-            System.out.println("=== Parallel mode (ForkJoin) ===");
-            System.out.printf("Thread count: %d%n", threadCount);
-            System.out.printf("Execution time: %.2f ms%n", parMs);
-            System.out.println("Common words: " + parResult);
+            double speedup = avgSeqMs / avgParMs;
+            double efficiency = speedup / threadCount;
+
+            // --- Output ---
+            System.out.println("=== Results (average over " + runs + " runs) ===");
+
+            System.out.printf("Sequential time: %.2f ms%n", avgSeqMs);
+            System.out.printf("Parallel time:   %.2f ms%n", avgParMs);
+
+            System.out.println("Common words: " + seqResult); // (результат той самий)
 
             System.out.println();
-
-            // --- Metrics ---
-            double speedup = seqMs / parMs;
-            double efficiency = speedup / threadCount;
             System.out.printf("Speedup: %.2f x%n", speedup);
             System.out.printf("Efficiency: %.4f%n", efficiency);
         }

@@ -1,7 +1,7 @@
 public class SpeedUpTest {
 
     public static void main(String[] args) {
-        int[] matrixSizes = {2496, 3008}; //{512, 992, 1504, 2016};
+        int[] matrixSizes = {512, 992, 1504, 2016}; //{2496, 3008}; //{512, 992, 1504, 2016};
         int numProcessors = Runtime.getRuntime().availableProcessors();
         int iterations = 8;
 

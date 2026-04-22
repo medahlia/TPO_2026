@@ -18,7 +18,7 @@ public class Main {
             return;
         }
 
-        int[] sizes = {500, 1000, 1500, 2000};
+        int[] sizes = {500, 1000}; //{500, 1000, 1500, 2000};
         int iterations = 10;
 
         if (rank == MASTER) {
