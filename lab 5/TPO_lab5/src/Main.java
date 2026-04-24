@@ -35,8 +35,8 @@ class RunResult {
 class QueueSimulation {
 
     // Параметри моделі
-    private static final int QUEUE_CAPACITY = 5;
-    private static final int NUM_CHANNELS = 3;
+    private static final int QUEUE_CAPACITY = 7;
+    private static final int NUM_CHANNELS = 4;
     private static final int TARGET_REQUESTS = 1000;
     private static final long ARRIVE_MIN_MS = 5;
     private static final long ARRIVE_MAX_MS = 100;
