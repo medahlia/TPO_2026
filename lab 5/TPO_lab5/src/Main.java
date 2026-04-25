@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// ─── Результат однієї симуляції ───────────────────────────────────────────────
+
 class RunResult {
     final int runId;
     final int produced;
@@ -31,10 +31,9 @@ class RunResult {
     }
 }
 
-// ─── Одна симуляція СМО ───────────────────────────────────────────────────────
 class QueueSimulation {
 
-    // Параметри моделі
+    // параметри моделі
     private static final int QUEUE_CAPACITY = 7;
     private static final int NUM_CHANNELS = 4;
     private static final int TARGET_REQUESTS = 1000;
@@ -56,14 +55,13 @@ class QueueSimulation {
         this.runId = runId;
     }
 
-    // ── Генератор заявок (1 потік) ────────────────────────────────────────
+    // генератор заявок
     private class Producer implements Runnable {
         @Override
         public void run() {
             while (produced.get() < TARGET_REQUESTS) {
                 int id = produced.incrementAndGet();
 
-                // Якщо черга повна — відмова, інакше — ставимо в чергу
                 if (!queue.offer(id)) {
                     refused.incrementAndGet();
                 }
@@ -76,7 +74,7 @@ class QueueSimulation {
         }
     }
 
-    // ── Канал обслуговування (NUM_CHANNELS потоків) ───────────────────────
+    // канал обслуговування NUM_CHANNELS
     private class Channel implements Runnable {
         @Override
         public void run() {
@@ -94,7 +92,7 @@ class QueueSimulation {
         }
     }
 
-    // ── Монітор стану (1 окремий потік — вимога завдання п.3) ────────────
+    //монітор стану
     private class Monitor implements Runnable {
         @Override
         public void run() {
@@ -111,16 +109,15 @@ class QueueSimulation {
         }
     }
 
-    // ── Запуск симуляції ──────────────────────────────────────────────────
+
     RunResult run() {
-        // Пул каналів обслуговування (вимога завдання п.1)
         ExecutorService channelPool = Executors.newFixedThreadPool(NUM_CHANNELS);
         for (int i = 0; i < NUM_CHANNELS; i++) {
             channelPool.submit(new Channel());
         }
 
         Thread producerThread = new Thread(new Producer());
-        Thread monitorThread = new Thread(new Monitor()); // п.3 — окремий потік
+        Thread monitorThread = new Thread(new Monitor());
 
         producerThread.start();
         monitorThread.start();
@@ -145,13 +142,11 @@ class QueueSimulation {
     }
 }
 
-// ─── Головний клас: паралельне виконання симуляцій (п.2) ─────────────────────
 public class Main {
 
     private static final int NUM_RUNS = 20;
 
     public static void main(String[] args) {
-        // Пул для паралельного запуску NUM_RUNS симуляцій (вимога п.2)
         ExecutorService simPool = Executors.newFixedThreadPool(NUM_RUNS);
         List<Future<RunResult>> futures = new ArrayList<>();
 
@@ -162,19 +157,18 @@ public class Main {
 
         simPool.shutdown();
 
-        // Збираємо результати
+        // збираємо результати
         List<RunResult> results = new ArrayList<>();
         for (Future<RunResult> f : futures) {
             try { results.add(f.get()); }
             catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
         }
 
-        // Виводимо кожну симуляцію
+        // кожна симуляцію
         for (RunResult r : results) {
             r.print();
         }
 
-        // Зведена статистика по всіх прогонах
         double totalRefuseProb = 0;
         double totalAvgQueue = 0;
 

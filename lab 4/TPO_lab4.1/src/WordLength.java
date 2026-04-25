@@ -17,7 +17,7 @@ public class WordLength {
 
     public static Stats analyzeParallel(List<String> texts) {
         TextTask.resetSplitCount();
-        ForkJoinPool pool = new ForkJoinPool(threadCount);
+        ForkJoinPool pool = new ForkJoinPool(threadCount); //
         try {
             return pool.invoke(new StringTask(texts, 0, texts.size()));
         } finally {
@@ -57,7 +57,6 @@ public class WordLength {
     public static Stats analyzeSequential(List<String> texts) {
         Stats stats = new Stats();
         for (String text : texts) {
-            // Той самий алгоритм що і в parallel — чесне порівняння
             analyzeTextRange(text, 0, text.length(), stats);
         }
         return stats;

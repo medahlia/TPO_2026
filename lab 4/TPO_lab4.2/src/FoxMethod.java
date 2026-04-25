@@ -79,14 +79,14 @@ public class FoxMethod {
                 // рекурсивне розбиття
                 if (rows >= cols) {
                     int midRow = (rowStart + rowEnd) / 2;
-                    FoxTask top    = new FoxTask(a, b, result, rowStart, midRow, colStart, colEnd);
+                    FoxTask top = new FoxTask(a, b, result, rowStart, midRow, colStart, colEnd);
                     FoxTask bottom = new FoxTask(a, b, result, midRow, rowEnd, colStart, colEnd);
                     top.fork();
                     bottom.compute();
                     top.join();
                 } else {
                     int midCol = (colStart + colEnd) / 2;
-                    FoxTask left  = new FoxTask(a, b, result, rowStart, rowEnd, colStart, midCol);
+                    FoxTask left = new FoxTask(a, b, result, rowStart, rowEnd, colStart, midCol);
                     FoxTask right = new FoxTask(a, b, result, rowStart, rowEnd, midCol, colEnd);
                     left.fork();
                     right.compute();

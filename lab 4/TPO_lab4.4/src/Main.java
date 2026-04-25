@@ -23,7 +23,6 @@ public class Main {
             List<String> keywords = parseKeywords(scanner.nextLine());
             System.out.println("Keywords: " + keywords);
 
-            // ── JVM warm-up ───────────────────────────────────────────
             searcher.findSequential(root, keywords);
             searcher.findParallel(root, keywords);
 
@@ -34,12 +33,10 @@ public class Main {
             List<String> parResult = null;
 
             for (int i = 0; i < runs; i++) {
-                // ── Sequential ────────────────────────────────────────
                 long t1 = System.nanoTime();
                 seqResult = searcher.findSequential(root, keywords);
                 totalSeq += System.nanoTime() - t1;
 
-                // ── Parallel ──────────────────────────────────────────
                 long t2 = System.nanoTime();
                 parResult = searcher.findParallel(root, keywords);
                 totalPar += System.nanoTime() - t2;

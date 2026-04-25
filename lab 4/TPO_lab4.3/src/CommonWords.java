@@ -7,22 +7,14 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 import java.util.stream.Collectors;
 
-/**
- * Finding common words in text documents using the ForkJoin Framework.
- * Based on the example from: https://www.oracle.com/technical-resources/articles/java/fork-join.html
- */
+
 public class CommonWords {
 
-    // Thread pool for parallel execution
     private static final ForkJoinPool pool = new ForkJoinPool();
 
     public static int getThreadCount() {
         return pool.getParallelism();
     }
-
-    // -------------------------------------------------------------------------
-    // Data model
-    // -------------------------------------------------------------------------
 
     static class Document {
         private final Path filePath;
@@ -66,10 +58,7 @@ public class CommonWords {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Sequential (single-threaded) algorithm
-    // -------------------------------------------------------------------------
-
+    // Sequential
     Set<String> findCommonWordsSequential(Folder root) {
         Set<String> result = new HashSet<>();
         traverseSequential(root, result);
@@ -98,18 +87,11 @@ public class CommonWords {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Parallel algorithm (ForkJoin)
-    // -------------------------------------------------------------------------
-
+    // Parallel
     Set<String> findCommonWordsParallel(Folder root) {
         return pool.invoke(new FolderTask(root));
     }
 
-    /**
-     * Task for processing a single folder: forks subtasks for subfolders,
-     * processes files in the current folder directly.
-     */
     static class FolderTask extends RecursiveTask<Set<String>> {
         private final Folder target;
 
@@ -119,7 +101,6 @@ public class CommonWords {
 
         @Override
         protected Set<String> compute() {
-            // Fork subtasks for subfolders asynchronously first
             List<FolderTask> subTasks = new ArrayList<>();
             for (Folder sub : target.nestedFolders) {
                 FolderTask worker = new FolderTask(sub);
@@ -127,7 +108,6 @@ public class CommonWords {
                 worker.fork();
             }
 
-            // Process files in the current folder
             Set<String> current = null;
             for (Document file : target.files) {
                 DocumentTask fw = new DocumentTask(file);
@@ -140,7 +120,6 @@ public class CommonWords {
                 }
             }
 
-            // Collect subtask results
             for (FolderTask st : subTasks) {
                 Set<String> subResult = st.join();
                 if (current == null) {
@@ -155,9 +134,6 @@ public class CommonWords {
         }
     }
 
-    /**
-     * Task for processing a single file. Splits into chunks if the file is large.
-     */
     static class DocumentTask extends RecursiveTask<Set<String>> {
         private static final int CHUNK_SIZE = 10_000;
         private final Document file;
@@ -187,7 +163,7 @@ public class CommonWords {
                 subtasks.add(sub);
                 sub.fork();
             }
-            // Merge chunks: union of all words in the file
+
             Set<String> merged = new HashSet<>();
             for (DocumentTask sub : subtasks) {
                 merged.addAll(sub.join());
@@ -200,7 +176,7 @@ public class CommonWords {
             int start = 0;
             while (start < text.length()) {
                 int end = Math.min(start + CHUNK_SIZE, text.length());
-                // Do not split words in the middle
+
                 if (end < text.length() && text.charAt(end) != ' ') {
                     while (end > start && text.charAt(end) != ' ') end--;
                 }
@@ -211,16 +187,12 @@ public class CommonWords {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Utility: extract unique words from text
-    // -------------------------------------------------------------------------
-
     static Set<String> extractWords(String text) {
         return Arrays.stream(text.split("\\W+"))
                 .map(String::toLowerCase)
                 .filter(w -> !w.isEmpty())
-                .filter(w -> w.matches("[a-z]+"))              // letters only, no digits
-                .filter(w -> w.length() > 1 || w.equals("a")) // single letters: only article "a"
+                .filter(w -> w.matches("[a-z]+"))
+                .filter(w -> w.length() > 1 || w.equals("a"))
                 .collect(Collectors.toSet());
     }
 }

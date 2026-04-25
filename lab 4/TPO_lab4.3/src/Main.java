@@ -18,7 +18,7 @@ public class Main {
             System.out.println("=============================");
             System.out.println("Folder: " + folder);
 
-            // --- JVM warm-up ---
+
             analyzer.findCommonWordsSequential(root);
             analyzer.findCommonWordsParallel(root);
 
@@ -30,13 +30,11 @@ public class Main {
 
             for (int i = 0; i < runs; i++) {
 
-                // --- Sequential ---
                 long t1Start = System.nanoTime();
                 seqResult = analyzer.findCommonWordsSequential(root);
                 long t1End = System.nanoTime();
                 totalSeq += (t1End - t1Start);
 
-                // --- Parallel ---
                 long t2Start = System.nanoTime();
                 parResult = analyzer.findCommonWordsParallel(root);
                 long t2End = System.nanoTime();
@@ -51,13 +49,13 @@ public class Main {
             double speedup = avgSeqMs / avgParMs;
             double efficiency = speedup / threadCount;
 
-            // --- Output ---
+
             System.out.println("=== Results (average over " + runs + " runs) ===");
 
             System.out.printf("Sequential time: %.2f ms%n", avgSeqMs);
             System.out.printf("Parallel time:   %.2f ms%n", avgParMs);
 
-            System.out.println("Common words: " + seqResult); // (результат той самий)
+            System.out.println("Common words: " + seqResult);
 
             System.out.println();
             System.out.printf("Speedup: %.2f x%n", speedup);

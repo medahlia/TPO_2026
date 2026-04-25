@@ -60,7 +60,7 @@ public class Main {
                  //       threshold, avgSpeedup, avgSpeedup / defaultThreads);
             }
 
-            // --- THREADS experiment ---
+            // threads experiment
             System.out.println("\n--- THREADS experiment ---");
             System.out.printf("%-12s %-15s %-15s%n", "Threads", "Avg Speedup", "Avg Efficiency");
 

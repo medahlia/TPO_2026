@@ -82,9 +82,9 @@ public class StripedMethod {
                     }
                 }
             } else {
-                // рекурсивне розбиття навпіл
+                // рекурсивне розбиття
                 int mid = (startRow + endRow) / 2;
-                StripedTask left  = new StripedTask(a, b, result, startRow, mid);
+                StripedTask left = new StripedTask(a, b, result, startRow, mid);
                 StripedTask right = new StripedTask(a, b, result, mid, endRow);
                 left.fork();
                 right.compute();
