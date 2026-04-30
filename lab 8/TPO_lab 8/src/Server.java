@@ -11,8 +11,12 @@ public class Server {
 
     public Server(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        System.out.println("Сервер запущено на порту " + port);
-        System.out.println("Потоків для обчислень: " + THREAD_COUNT);
+        System.out.println("Server started on port " + port);
+        System.out.println("Threads: " + THREAD_COUNT);
+        System.out.println();
+        System.out.println("+--------+--------------+--------------+---------------+-------------+");
+        System.out.println("| Mode   | Size         | Receive (ms) | Compute (ms)  | Send (ms)   |");
+        System.out.println("+--------+--------------+--------------+---------------+-------------+");
     }
 
     // ── Головний цикл: кожен клієнт обробляється в окремому потоці ────────
@@ -44,7 +48,7 @@ public class Server {
                 int mode = in.readInt();
                 int n = in.readInt(); // рядки A
                 int m = in.readInt(); // стовпці A = рядки B
-                int p    = in.readInt(); // стовпці B
+                int p = in.readInt(); // стовпці B
 
                 long recvStart = System.nanoTime();
                 int[][] matA;
@@ -72,12 +76,12 @@ public class Server {
                 long sendTime = System.nanoTime() - sendStart;
 
                 System.out.printf(
-                        "mode=%d  розмір=%dx%dx%d  " +
-                                "прийом=%.1f мс  обчислення=%.1f мс  відправка=%.1f мс%n",
-                        mode, n, m, p,
-                        recvTime     / 1e6,
-                        computeTime  / 1e6,
-                        sendTime     / 1e6
+                        "| %-6d | %-12s | %-12.1f | %-13.1f | %-11.1f |%n",
+                        mode,
+                        n + "x" + m + "x" + p,
+                        recvTime    / 1e6,
+                        computeTime / 1e6,
+                        sendTime    / 1e6
                 );
 
                 in.close();
@@ -103,8 +107,7 @@ public class Server {
     }
 
     // ── Читання матриці n×m з потоку (int за int) ──────────────────────────
-    private int[][] receiveMatrix(DataInputStream in, int n, int m)
-            throws IOException {
+    private int[][] receiveMatrix(DataInputStream in, int n, int m) throws IOException {
         int[][] mat = new int[n][m];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
@@ -115,8 +118,7 @@ public class Server {
     }
 
     // ── Відправка матриці через ByteBuffer (ефективніше ніж writeInt по одному) ─
-    private void sendMatrix(int[][] mat, DataOutputStream out)
-            throws IOException {
+    private void sendMatrix(int[][] mat, DataOutputStream out) throws IOException {
         int rows = mat.length;
         int cols = mat[0].length;
         ByteBuffer buf = ByteBuffer.allocate(rows * cols * 4);
@@ -165,13 +167,12 @@ public class Server {
         private final int cols;
         private final int inner;
 
-        RowTask(int[][] matA, int[][] matB, int[][] matC,
-                int row, int cols, int inner) {
-            this.matA  = matA;
-            this.matB  = matB;
-            this.matC  = matC;
-            this.row   = row;
-            this.cols  = cols;
+        RowTask(int[][] matA, int[][] matB, int[][] matC, int row, int cols, int inner) {
+            this.matA = matA;
+            this.matB = matB;
+            this.matC = matC;
+            this.row = row;
+            this.cols = cols;
             this.inner = inner;
         }
 
