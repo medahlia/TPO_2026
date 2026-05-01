@@ -63,7 +63,7 @@ public class GMDHParallel {
 
         // --- Дані ---
         // Для реальних даних розкоментуй:
-        //double[][] data = readData("clean_water_data.txt", 2011, 9);
+        // double[][] data = readData("climate_data.txt", 23, 5);
         double[][] data = getData();
 
         int n = data.length;
@@ -266,8 +266,22 @@ public class GMDHParallel {
             System.out.println(" Congratulations! You have a quality model.");
             out.println(" Congratulations! You have a quality model.");
         }
+        // --- Записуємо точки для графіка ---
+        // Формат: POINT <індекс> <реальне_y> <модельне_y>
+        // PlotResults.java читає цей блок і малює графік JavaFX.
+        Matrix mYmod = MatrixMathematics.multiply(subMatrix(modelOpt, new Matrix(XAB)), mB);
+        String[] colNames = {"pH","Hardness","Solids","Chloramines","Sulfate",
+                "Organic_carbon","Trihalomethanes","Turbidity","Conductivity"};
+        String yName = (m < colNames.length) ? colNames[m] : "y";
+        out.println("\n--- POINTS ---");
+        out.println("Y_NAME " + yName);
+        for (int j = 0; j < YAB.length; j++) {
+            out.printf("POINT %d %.8f %.8f%n", j, YAB[j][0], mYmod.getValueAt(j, 0));
+        }
+
         out.close();
         System.out.println("\n[Root] Готово. Результати збережено у RESULTS_MPI.txt");
+        System.out.println("[Root] Для графіка запусти PlotResults з IntelliJ.");
     }
 
     // =========================================================================
