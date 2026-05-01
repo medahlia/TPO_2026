@@ -63,7 +63,7 @@ public class GMDHParallel {
 
         // --- Дані ---
         // Для реальних даних розкоментуй:
-        // double[][] data = readData("climate_data.txt", 23, 5);
+        //double[][] data = readData("clean_water_data.txt", 2011, 9);
         double[][] data = getData();
 
         int n = data.length;
