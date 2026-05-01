@@ -63,8 +63,8 @@ public class GMDHParallel {
 
         // --- Дані ---
         // Для реальних даних розкоментуй:
-        // double[][] data = readData("climate_data.txt", 23, 5);
-        double[][] data = getData();
+        double[][] data = readData("clean_water_data.txt", 23, 5);
+        //double[][] data = getData();
 
         int n = data.length;
         int m = data[0].length - 1;
@@ -276,7 +276,12 @@ public class GMDHParallel {
         out.println("\n--- POINTS ---");
         out.println("Y_NAME " + yName);
         for (int j = 0; j < YAB.length; j++) {
-            out.printf("POINT %d %.8f %.8f%n", j, YAB[j][0], mYmod.getValueAt(j, 0));
+            out.printf("POINT %d %.8f %.8f %.8f%n",
+                    j,
+                    XAB[j][1],              // X !!!
+                    YAB[j][0],              // real
+                    mYmod.getValueAt(j, 0)  // model
+            );
         }
 
         out.close();
